@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">SDK</string>
+    <string name="app_name">WhiteDemo</string>
+    <string name="title_activity_teacher">TeacherActivity</string>
 </resources>
