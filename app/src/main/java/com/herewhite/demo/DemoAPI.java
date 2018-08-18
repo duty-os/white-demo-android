@@ -37,4 +37,14 @@ public class DemoAPI {
         Call call = client.newCall(request);
         call.enqueue(callback);
     }
+
+    public void joinRoom(String uuid, Callback callback) {
+        RequestBody body = RequestBody.create(JSON, "{}");
+        Request request = new Request.Builder()
+                .url("https://cloudcapiv3.herewhite.com/room/join?uuid=" + uuid + "&token=" + TOKEN)
+                .post(body)
+                .build();
+        Call call = client.newCall(request);
+        call.enqueue(callback);
+    }
 }
