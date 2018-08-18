@@ -21,6 +21,7 @@ import com.herewhite.sdk.domain.PptPage;
 import com.herewhite.sdk.domain.Promise;
 import com.herewhite.sdk.domain.RoomPhase;
 import com.herewhite.sdk.domain.RoomState;
+import com.herewhite.sdk.domain.SDKError;
 
 import java.io.IOException;
 
@@ -79,15 +80,15 @@ public class MainActivity extends AppCompatActivity {
         whiteSdk.joinRoom(new RoomParams(uuid, roomToken), new Promise<Room>() {
             @Override
             public void then(Room room) {
-                MemberState memberState = new MemberState();
-//                memberState.setStrokeColor(new int[]{99, 99, 99});
-                memberState.setCurrentApplianceName("rectangle");
-//                memberState.setStrokeWidth(10);
-                room.setMemberState(memberState);
-
-//                room.setViewSize(100, 100);
-                room.insertNewPage(1);
-                room.removePage(1);
+//                MemberState memberState = new MemberState();
+////                memberState.setStrokeColor(new int[]{99, 99, 99});
+//                memberState.setCurrentApplianceName("rectangle");
+////                memberState.setStrokeWidth(10);
+//                room.setMemberState(memberState);
+//
+////                room.setViewSize(100, 100);
+//                room.insertNewPage(1);
+//                room.removePage(1);
 
                 GlobalState globalState = new GlobalState();
                 globalState.setCurrentSceneIndex(1);
@@ -116,16 +117,16 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void catchEx(Exception t) {
-
+                    public void catchEx(SDKError t) {
+                        showToast(t.getMessage());
                     }
                 });
 
             }
 
             @Override
-            public void catchEx(Exception t) {
-
+            public void catchEx(SDKError t) {
+                showToast(t.getMessage());
             }
         });
     }
