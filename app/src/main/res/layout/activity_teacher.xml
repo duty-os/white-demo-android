@@ -15,11 +15,24 @@
         android:layout_weight="0.8"
         android:visibility="visible" />
 
-    <EditText
-        android:id="@+id/uuidView"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.1" />
+        android:layout_weight="0.1"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/uuidView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
+
+        <Button
+            android:id="@+id/copy"
+            android:text="复制到粘贴板"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
+    </LinearLayout>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
@@ -27,30 +40,30 @@
         android:layout_height="0dp"
         android:layout_weight="0.1"
         android:orientation="horizontal">
+
         <Button
             android:id="@+id/pencil"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="画笔"
-            />
+            android:text="画笔" />
+
         <Button
             android:id="@+id/selector"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="选择"
-            />
+            android:text="选择" />
+
         <Button
             android:id="@+id/rectangle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="方形"
-            />
+            android:text="方形" />
+
         <Button
             android:id="@+id/eraser"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="橡皮"
-            />
+            android:text="橡皮" />
     </LinearLayout>
 
 </LinearLayout>

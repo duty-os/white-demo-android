@@ -1,5 +1,8 @@
 package com.herewhite.demo;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -68,10 +71,9 @@ public class TeacherActivity extends AppCompatActivity {
         });
 
 
-
     }
 
-    private void bindButton(final Room room) {
+    private void bindButton(final Room room, final String uuid) {
         findViewById(R.id.pencil).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -104,9 +106,17 @@ public class TeacherActivity extends AppCompatActivity {
                 room.setMemberState(memberState);
             }
         });
+        findViewById(R.id.copy).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData mClipData = ClipData.newPlainText("room", uuid);
+                cm.setPrimaryClip(mClipData);
+            }
+        });
     }
 
-    private void joinRoom(String uuid, String roomToken) {
+    private void joinRoom(final String uuid, String roomToken) {
         WhiteSdk whiteSdk = new WhiteSdk(
                 whiteBroadView,
                 TeacherActivity.this,
@@ -127,7 +137,7 @@ public class TeacherActivity extends AppCompatActivity {
             @Override
             public void then(Room room) {
 
-                bindButton(room);
+                bindButton(room, uuid);
                 GlobalState globalState = new GlobalState();
                 globalState.setCurrentSceneIndex(1);
                 room.setGlobalState(globalState);
