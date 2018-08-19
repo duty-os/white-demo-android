@@ -1,8 +1,12 @@
 package com.herewhite.demo;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -14,9 +18,11 @@ import com.herewhite.sdk.RoomParams;
 import com.herewhite.sdk.WhiteBroadView;
 import com.herewhite.sdk.WhiteSdk;
 import com.herewhite.sdk.WhiteSdkConfiguration;
+import com.herewhite.sdk.domain.Appliance;
 import com.herewhite.sdk.domain.BroadcastState;
 import com.herewhite.sdk.domain.DeviceType;
 import com.herewhite.sdk.domain.GlobalState;
+import com.herewhite.sdk.domain.MemberState;
 import com.herewhite.sdk.domain.PptPage;
 import com.herewhite.sdk.domain.Promise;
 import com.herewhite.sdk.domain.RoomPhase;
@@ -67,7 +73,50 @@ public class TeacherActivity extends AppCompatActivity {
 
     }
 
-    private void joinRoom(String uuid, String roomToken) {
+    private void bindButton(final Room room, final String uuid) {
+        findViewById(R.id.pencil).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MemberState memberState = new MemberState();
+                memberState.setCurrentApplianceName(Appliance.PENCIL);
+                room.setMemberState(memberState);
+            }
+        });
+        findViewById(R.id.selector).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MemberState memberState = new MemberState();
+                memberState.setCurrentApplianceName(Appliance.SELECTOR);
+                room.setMemberState(memberState);
+            }
+        });
+        findViewById(R.id.rectangle).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MemberState memberState = new MemberState();
+                memberState.setCurrentApplianceName(Appliance.RECTANGLE);
+                room.setMemberState(memberState);
+            }
+        });
+        findViewById(R.id.eraser).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MemberState memberState = new MemberState();
+                memberState.setCurrentApplianceName(Appliance.ERASER);
+                room.setMemberState(memberState);
+            }
+        });
+        findViewById(R.id.copy).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData mClipData = ClipData.newPlainText("room", uuid);
+                cm.setPrimaryClip(mClipData);
+            }
+        });
+    }
+
+    private void joinRoom(final String uuid, String roomToken) {
         WhiteSdk whiteSdk = new WhiteSdk(
                 whiteBroadView,
                 TeacherActivity.this,
@@ -88,6 +137,7 @@ public class TeacherActivity extends AppCompatActivity {
             @Override
             public void then(Room room) {
 
+                bindButton(room, uuid);
                 GlobalState globalState = new GlobalState();
                 globalState.setCurrentSceneIndex(1);
                 room.setGlobalState(globalState);
