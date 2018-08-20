@@ -84,21 +84,21 @@ public class JoinActivity extends AppCompatActivity {
             @Override
             public void then(Room room) {
 
-                GlobalState globalState = new GlobalState();
-                globalState.setCurrentSceneIndex(1);
-                room.setGlobalState(globalState);
-
-                room.getBroadcastState(new Promise<BroadcastState>() {
-                    @Override
-                    public void then(BroadcastState broadcastState) {
-                        showToast(broadcastState.getMode());
-                    }
-
-                    @Override
-                    public void catchEx(SDKError t) {
-                        showToast(t.getMessage());
-                    }
-                });
+//                GlobalState globalState = new GlobalState();
+//                globalState.setCurrentSceneIndex(1);
+//                room.setGlobalState(globalState);
+//
+//                room.getBroadcastState(new Promise<BroadcastState>() {
+//                    @Override
+//                    public void then(BroadcastState broadcastState) {
+//                        showToast(broadcastState.getMode());
+//                    }
+//
+//                    @Override
+//                    public void catchEx(SDKError t) {
+//                        showToast(t.getMessage());
+//                    }
+//                });
 
             }
 
