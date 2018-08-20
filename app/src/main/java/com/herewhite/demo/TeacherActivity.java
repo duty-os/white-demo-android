@@ -138,26 +138,26 @@ public class TeacherActivity extends AppCompatActivity {
             public void then(Room room) {
 
                 bindButton(room, uuid);
-                GlobalState globalState = new GlobalState();
-                globalState.setCurrentSceneIndex(1);
-                room.setGlobalState(globalState);
-
-                room.pushPptPages(new PptPage[]{
-                        new PptPage("https://white-pan.oss-cn-shanghai.aliyuncs.com/101/image/image.png", 600d, 600d),
-                });
-
-
-                room.getBroadcastState(new Promise<BroadcastState>() {
-                    @Override
-                    public void then(BroadcastState broadcastState) {
-                        showToast(broadcastState.getMode());
-                    }
-
-                    @Override
-                    public void catchEx(SDKError t) {
-                        showToast(t.getMessage());
-                    }
-                });
+//                GlobalState globalState = new GlobalState();
+//                globalState.setCurrentSceneIndex(1);
+//                room.setGlobalState(globalState);
+//
+//                room.pushPptPages(new PptPage[]{
+//                        new PptPage("https://white-pan.oss-cn-shanghai.aliyuncs.com/101/image/image.png", 600d, 600d),
+//                });
+//
+//
+//                room.getBroadcastState(new Promise<BroadcastState>() {
+//                    @Override
+//                    public void then(BroadcastState broadcastState) {
+//                        showToast(broadcastState.getMode());
+//                    }
+//
+//                    @Override
+//                    public void catchEx(SDKError t) {
+//                        showToast(t.getMessage());
+//                    }
+//                });
 
             }
 
