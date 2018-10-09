@@ -18,9 +18,12 @@ import com.herewhite.sdk.RoomParams;
 import com.herewhite.sdk.WhiteBroadView;
 import com.herewhite.sdk.WhiteSdk;
 import com.herewhite.sdk.WhiteSdkConfiguration;
+import com.herewhite.sdk.domain.AkkoEvent;
 import com.herewhite.sdk.domain.Appliance;
 import com.herewhite.sdk.domain.BroadcastState;
 import com.herewhite.sdk.domain.DeviceType;
+import com.herewhite.sdk.domain.EventEntry;
+import com.herewhite.sdk.domain.EventListener;
 import com.herewhite.sdk.domain.GlobalState;
 import com.herewhite.sdk.domain.MemberState;
 import com.herewhite.sdk.domain.PptPage;
@@ -30,10 +33,14 @@ import com.herewhite.sdk.domain.RoomState;
 import com.herewhite.sdk.domain.SDKError;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+
+import static com.herewhite.demo.MainActivity.EVENT_NAME;
 
 public class TeacherActivity extends AppCompatActivity {
 
@@ -74,6 +81,12 @@ public class TeacherActivity extends AppCompatActivity {
     }
 
     private void bindButton(final Room room, final String uuid) {
+        room.addMagixEventListener(EVENT_NAME, new EventListener() {
+            @Override
+            public void onEvent(EventEntry eventEntry) {
+                showToast(gson.toJson(eventEntry));
+            }
+        });
         findViewById(R.id.pencil).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -104,6 +117,14 @@ public class TeacherActivity extends AppCompatActivity {
                 MemberState memberState = new MemberState();
                 memberState.setCurrentApplianceName(Appliance.ERASER);
                 room.setMemberState(memberState);
+            }
+        });
+        findViewById(R.id.event).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Map<String, String> payload = new HashMap<>();
+                payload.put("test", "js");
+                room.dispatchMagixEvent(new AkkoEvent(EVENT_NAME, payload));
             }
         });
         findViewById(R.id.copy).setOnClickListener(new View.OnClickListener() {
