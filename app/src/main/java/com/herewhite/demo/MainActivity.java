@@ -34,6 +34,7 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
+    public final static String EVENT_NAME = "hello";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

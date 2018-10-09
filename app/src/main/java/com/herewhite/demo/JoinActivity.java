@@ -16,6 +16,8 @@ import com.herewhite.sdk.WhiteSdk;
 import com.herewhite.sdk.WhiteSdkConfiguration;
 import com.herewhite.sdk.domain.BroadcastState;
 import com.herewhite.sdk.domain.DeviceType;
+import com.herewhite.sdk.domain.EventEntry;
+import com.herewhite.sdk.domain.EventListener;
 import com.herewhite.sdk.domain.GlobalState;
 import com.herewhite.sdk.domain.PptPage;
 import com.herewhite.sdk.domain.Promise;
@@ -28,6 +30,8 @@ import java.io.IOException;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+
+import static com.herewhite.demo.MainActivity.EVENT_NAME;
 
 public class JoinActivity extends AppCompatActivity {
 
@@ -83,7 +87,12 @@ public class JoinActivity extends AppCompatActivity {
         whiteSdk.joinRoom(new RoomParams(uuid, roomToken), new Promise<Room>() {
             @Override
             public void then(Room room) {
-
+                room.addMagixEventListener(EVENT_NAME, new EventListener() {
+                    @Override
+                    public void onEvent(EventEntry eventEntry) {
+                        showToast(gson.toJson(eventEntry));
+                    }
+                });
 //                GlobalState globalState = new GlobalState();
 //                globalState.setCurrentSceneIndex(1);
 //                room.setGlobalState(globalState);
