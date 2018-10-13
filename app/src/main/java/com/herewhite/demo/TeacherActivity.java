@@ -84,6 +84,15 @@ public class TeacherActivity extends AppCompatActivity {
         room.addMagixEventListener(EVENT_NAME, new EventListener() {
             @Override
             public void onEvent(EventEntry eventEntry) {
+                Map<String, Object> payload = new HashMap<>();
+                payload.put("test", "js");
+                room.dispatchMagixEvent(new AkkoEvent("event2", payload));
+                showToast(gson.toJson(eventEntry));
+            }
+        });
+        room.addMagixEventListener("event2", new EventListener() {
+            @Override
+            public void onEvent(EventEntry eventEntry) {
                 showToast(gson.toJson(eventEntry));
             }
         });
@@ -122,8 +131,12 @@ public class TeacherActivity extends AppCompatActivity {
         findViewById(R.id.event).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Map<String, String> payload = new HashMap<>();
+                Map<String, Object> payload = new HashMap<>();
                 payload.put("test", "js");
+                Map<String, Object> childPayload = new HashMap<>();
+                childPayload.put("id", 2222);
+                childPayload.put("ddd", "ddd");
+                payload.put("child", childPayload);
                 room.dispatchMagixEvent(new AkkoEvent(EVENT_NAME, payload));
             }
         });
