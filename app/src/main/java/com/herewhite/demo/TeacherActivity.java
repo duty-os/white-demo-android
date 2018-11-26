@@ -172,6 +172,8 @@ public class TeacherActivity extends AppCompatActivity {
             public void then(Room room) {
 
                 bindButton(room, uuid);
+
+                throw new RuntimeException("I throw a biz exception, SDK will be catch it.");
 //                GlobalState globalState = new GlobalState();
 //                globalState.setCurrentSceneIndex(1);
 //                room.setGlobalState(globalState);
