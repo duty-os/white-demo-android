@@ -158,13 +158,18 @@ public class TeacherActivity extends AppCompatActivity {
         whiteSdk.addRoomCallbacks(new AbstractRoomCallbacks() {
             @Override
             public void onPhaseChanged(RoomPhase phase) {
-                showToast(phase.name());
-                // handle room phase
             }
 
             @Override
             public void onRoomStateChanged(RoomState modifyState) {
-//                showToast(gson.toJson(modifyState));
+            }
+
+            @Override
+            public void onDisconnectWithError(Exception e) {
+            }
+
+            @Override
+            public void onKickedWithReason(String reason) {
             }
         });
         whiteSdk.joinRoom(new RoomParams(uuid, roomToken), new Promise<Room>() {
@@ -172,6 +177,10 @@ public class TeacherActivity extends AppCompatActivity {
             public void then(Room room) {
 
                 bindButton(room, uuid);
+
+                room.zoomChange(1.2);
+
+//                room.disableOperations(true); // read only
 
                 throw new RuntimeException("I throw a biz exception, SDK will be catch it.");
 //                GlobalState globalState = new GlobalState();
