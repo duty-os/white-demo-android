@@ -32,6 +32,7 @@ import com.herewhite.sdk.domain.RoomPhase;
 import com.herewhite.sdk.domain.RoomState;
 import com.herewhite.sdk.domain.SDKError;
 
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +48,7 @@ public class TeacherActivity extends AppCompatActivity {
     WhiteBroadView whiteBroadView;
     Gson gson = new Gson();
     DemoAPI demoAPI = new DemoAPI();
+    private EditText scaleText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +56,7 @@ public class TeacherActivity extends AppCompatActivity {
         setContentView(R.layout.activity_teacher);
         final EditText uuidView = (EditText) findViewById(R.id.uuidView);
         whiteBroadView = (WhiteBroadView) findViewById(R.id.white);
+        scaleText = findViewById(R.id.scale);
         demoAPI.createRoom("unknow", 100, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -107,9 +110,14 @@ public class TeacherActivity extends AppCompatActivity {
         findViewById(R.id.selector).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MemberState memberState = new MemberState();
-                memberState.setCurrentApplianceName(Appliance.SELECTOR);
-                room.setMemberState(memberState);
+//                MemberState memberState = new MemberState();
+//                memberState.setCurrentApplianceName(Appliance.SELECTOR);
+//                room.setMemberState(memberState);
+
+
+                GlobalState globalState = new GlobalState();
+                globalState.setCurrentSceneIndex(2);
+                room.setGlobalState(globalState);
             }
         });
         findViewById(R.id.rectangle).setOnClickListener(new View.OnClickListener() {
@@ -155,13 +163,32 @@ public class TeacherActivity extends AppCompatActivity {
                 whiteBroadView,
                 TeacherActivity.this,
                 new WhiteSdkConfiguration(DeviceType.touch, 10, 0.1));
+//                new WhiteSdkConfiguration(DeviceType.touch, 1, 1)); // If you don't need scale
         whiteSdk.addRoomCallbacks(new AbstractRoomCallbacks() {
             @Override
             public void onPhaseChanged(RoomPhase phase) {
             }
 
             @Override
-            public void onRoomStateChanged(RoomState modifyState) {
+            public void onRoomStateChanged(final RoomState modifyState) {
+//                if (modifyState.getZoomScale() != null) {
+//                    scaleText.setText(String.valueOf(modifyState.getZoomScale().intValue() * 100));
+//                }
+
+                scaleText.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (modifyState.getZoomScale() != null) {
+                            scaleText.setText(String.valueOf((int)(modifyState.getZoomScale() * 100)));
+                        }
+                    }
+                });
+//                showToast("scale " + modifyState.getZoomScale());
+//                showToast("ppt " + modifyState.getPptImages());
+
+                if (modifyState.getPptImages() != null) {
+                    showToast("ppt " + modifyState.getPptImages()[1]);
+                }
             }
 
             @Override
@@ -182,14 +209,16 @@ public class TeacherActivity extends AppCompatActivity {
 
 //                room.disableOperations(true); // read only
 
-                throw new RuntimeException("I throw a biz exception, SDK will be catch it.");
+//                throw new RuntimeException("I throw a biz exception, SDK will be catch it.");
 //                GlobalState globalState = new GlobalState();
 //                globalState.setCurrentSceneIndex(1);
 //                room.setGlobalState(globalState);
 //
-//                room.pushPptPages(new PptPage[]{
-//                        new PptPage("https://white-pan.oss-cn-shanghai.aliyuncs.com/101/image/image.png", 600d, 600d),
-//                });
+                room.pushPptPages(new PptPage[]{new PptPage("http://oss.tan8.com/yuepuku/69/34654/prev_34654.0.png", 497d, 703d),
+                        new PptPage("http://photo.yupoo.com/gwy0606/294324b7eeb7/medish.jpg", 473d, 640d),
+                        new PptPage("http://www.77music.com/yuepuku/33/16878/prev_16878.0.png?v=1342110119", 543d, 703d),});
+
+
 //
 //
 //                room.getBroadcastState(new Promise<BroadcastState>() {
