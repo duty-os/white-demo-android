@@ -20,7 +20,7 @@ public class DemoAPI {
 
     public static final MediaType JSON
             = MediaType.parse("application/json; charset=utf-8");
-    // 获取 Token 请参考 https://www.yuque.com/herewhite/sdk/quickstart#f3nvan
+    // 获取 Token 请参考
     public static final String TOKEN = "(请注册 console.herewhite.com 申请 Token 进行接入)";
     private OkHttpClient client = new OkHttpClient();
     private Gson gson = new Gson();
