@@ -31,7 +31,9 @@ import java.io.IOException;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
-
+/**
+ * 运行 demo 前请先修改 DemoAPI.java 中的 Token : 注册 console.herewhite.com 申请 Token 进行接入
+ */
 public class MainActivity extends AppCompatActivity {
 
     public final static String EVENT_NAME = "hello";
