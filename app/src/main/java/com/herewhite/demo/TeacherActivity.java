@@ -20,18 +20,16 @@ import com.herewhite.sdk.WhiteSdk;
 import com.herewhite.sdk.WhiteSdkConfiguration;
 import com.herewhite.sdk.domain.AkkoEvent;
 import com.herewhite.sdk.domain.Appliance;
-import com.herewhite.sdk.domain.BroadcastState;
 import com.herewhite.sdk.domain.DeviceType;
 import com.herewhite.sdk.domain.EventEntry;
 import com.herewhite.sdk.domain.EventListener;
-import com.herewhite.sdk.domain.GlobalState;
 import com.herewhite.sdk.domain.MemberState;
 import com.herewhite.sdk.domain.PptPage;
 import com.herewhite.sdk.domain.Promise;
 import com.herewhite.sdk.domain.RoomPhase;
 import com.herewhite.sdk.domain.RoomState;
 import com.herewhite.sdk.domain.SDKError;
-
+import com.herewhite.sdk.domain.UrlInterrupter;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -110,14 +108,13 @@ public class TeacherActivity extends AppCompatActivity {
         findViewById(R.id.selector).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                MemberState memberState = new MemberState();
-//                memberState.setCurrentApplianceName(Appliance.SELECTOR);
-//                room.setMemberState(memberState);
+                MemberState memberState = new MemberState();
+                memberState.setCurrentApplianceName(Appliance.SELECTOR);
+                room.setMemberState(memberState);
 
-
-                GlobalState globalState = new GlobalState();
-                globalState.setCurrentSceneIndex(2);
-                room.setGlobalState(globalState);
+//                GlobalState globalState = new GlobalState();
+//                globalState.setCurrentSceneIndex(2);
+//                room.setGlobalState(globalState);
             }
         });
         findViewById(R.id.rectangle).setOnClickListener(new View.OnClickListener() {
@@ -162,8 +159,16 @@ public class TeacherActivity extends AppCompatActivity {
         WhiteSdk whiteSdk = new WhiteSdk(
                 whiteBroadView,
                 TeacherActivity.this,
-                new WhiteSdkConfiguration(DeviceType.touch, 10, 0.1));
-//                new WhiteSdkConfiguration(DeviceType.touch, 1, 1)); // If you don't need scale
+                new WhiteSdkConfiguration(DeviceType.touch, 10, 0.1)
+                // 如果需要拦截并重写 URL ,请实现如下方法, 但请注意不要每次都生成不同的 URL,尽量 cache 结果并请在必要的时候进行更新(如 更新私有 Token)
+                ,new UrlInterrupter() {
+                    @Override
+                    public String urlInterrupter(String s) {
+                        // 修改资源 URL
+                        return s;
+                    }
+                }
+        );
         whiteSdk.addRoomCallbacks(new AbstractRoomCallbacks() {
             @Override
             public void onPhaseChanged(RoomPhase phase) {
@@ -179,7 +184,7 @@ public class TeacherActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         if (modifyState.getZoomScale() != null) {
-                            scaleText.setText(String.valueOf((int)(modifyState.getZoomScale() * 100)));
+                            scaleText.setText(String.valueOf((int) (modifyState.getZoomScale() * 100)));
                         }
                     }
                 });
