@@ -26,6 +26,7 @@ import com.herewhite.sdk.domain.EventListener;
 import com.herewhite.sdk.domain.MemberState;
 import com.herewhite.sdk.domain.PptPage;
 import com.herewhite.sdk.domain.Promise;
+import com.herewhite.sdk.domain.RoomMouseEvent;
 import com.herewhite.sdk.domain.RoomPhase;
 import com.herewhite.sdk.domain.RoomState;
 import com.herewhite.sdk.domain.SDKError;
