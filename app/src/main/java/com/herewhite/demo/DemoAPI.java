@@ -29,9 +29,10 @@ public class DemoAPI {
         Map<String, Object> roomSpec = new HashMap<>();
         roomSpec.put("name", name);
         roomSpec.put("limit", limit);
+        roomSpec.put("mode", "historied");
         RequestBody body = RequestBody.create(JSON, gson.toJson(roomSpec));
         Request request = new Request.Builder()
-                .url("https://cloudcapiv3.herewhite.com/room?token=" + TOKEN)
+                .url("https://cloudcapiv4.herewhite.com/room?token=" + TOKEN)
                 .post(body)
                 .build();
         Call call = client.newCall(request);
@@ -41,7 +42,7 @@ public class DemoAPI {
     public void joinRoom(String uuid, Callback callback) {
         RequestBody body = RequestBody.create(JSON, "{}");
         Request request = new Request.Builder()
-                .url("https://cloudcapiv3.herewhite.com/room/join?uuid=" + uuid + "&token=" + TOKEN)
+                .url("https://cloudcapiv4.herewhite.com/room/join?uuid=" + uuid + "&token=" + TOKEN)
                 .post(body)
                 .build();
         Call call = client.newCall(request);

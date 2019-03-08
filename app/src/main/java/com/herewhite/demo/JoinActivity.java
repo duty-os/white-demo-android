@@ -72,7 +72,7 @@ public class JoinActivity extends AppCompatActivity {
                 whiteBroadView,
                 JoinActivity.this,
                 new WhiteSdkConfiguration(DeviceType.touch, 10, 0.1));
-        whiteSdk.addRoomCallbacks(new AbstractRoomCallbacks() {
+        whiteSdk.joinRoom(new RoomParams(uuid, roomToken), new AbstractRoomCallbacks() {
             @Override
             public void onPhaseChanged(RoomPhase phase) {
                 showToast(phase.name());
@@ -83,8 +83,7 @@ public class JoinActivity extends AppCompatActivity {
             public void onRoomStateChanged(RoomState modifyState) {
 //                showToast(gson.toJson(modifyState));
             }
-        });
-        whiteSdk.joinRoom(new RoomParams(uuid, roomToken), new Promise<Room>() {
+        }, new Promise<Room>() {
             @Override
             public void then(Room room) {
                 room.addMagixEventListener(EVENT_NAME, new EventListener() {
@@ -93,6 +92,9 @@ public class JoinActivity extends AppCompatActivity {
                         showToast(gson.toJson(eventEntry));
                     }
                 });
+
+
+                room.setScenePath("/ppt1/page3");
 //                GlobalState globalState = new GlobalState();
 //                globalState.setCurrentSceneIndex(1);
 //                room.setGlobalState(globalState);
