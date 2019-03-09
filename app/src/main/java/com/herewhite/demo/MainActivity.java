@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         final EditText uuidInput = (EditText) findViewById(R.id.uuid);
+        final EditText m3u8Input = (EditText) findViewById(R.id.m3u8);
 
         findViewById(R.id.join).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,6 +59,24 @@ public class MainActivity extends AppCompatActivity {
                 if (text.length() == 32) {  //uuid length is 32
                     Intent intent = new Intent(MainActivity.this, JoinActivity.class);
                     intent.putExtra("uuid", text);
+                    MainActivity.this.startActivity(intent);
+                } else {
+
+                }
+
+            }
+        });
+
+
+        findViewById(R.id.play).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String text = uuidInput.getText().toString();
+                String m3u8 = m3u8Input.getText().toString();
+                if (text.length() == 32) {  //uuid length is 32
+                    Intent intent = new Intent(MainActivity.this, PlayActivity.class);
+                    intent.putExtra("uuid", text);
+                    intent.putExtra("m3u8", m3u8);
                     MainActivity.this.startActivity(intent);
                 } else {
 
