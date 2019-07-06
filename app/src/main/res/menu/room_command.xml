@@ -9,6 +9,14 @@
     <item android:id="@+id/getBroadcastState"
         android:onClick="getBroadcastState"
         android:title="@string/getBroadcastState_command"/>
+    <item android:id="@+id/moveCamera"
+        android:onClick="moveCamera"
+        android:title="移动视角位置"
+        />
+    <item android:id="@+id/moveRectangle"
+        android:onClick="moveRectangle"
+        android:title="调整视野位置"
+        />
     <item android:id="@+id/dispatchCustomEvent"
         android:onClick="dispatchCustomEvent"
         android:title="@string/dispatchCustomEvent_command"/>
@@ -21,9 +29,24 @@
     <item android:id="@+id/insert_ppt"
         android:onClick="insertPPT"
         android:title="@string/insert_ppt_command"/>
+    <item android:onClick="nextScene"
+        android:id="@+id/next_scene"
+        android:title="@string/next_scene" />
+    <item android:id="@+id/static_ppt"
+        android:onClick="staticConvert"
+        android:title="@string/staticConvert"/>
+    <item android:id="@+id/dynamic_ppt"
+        android:onClick="dynamicConvert"
+        android:title="@string/dynamicConvert"/>
     <item android:id="@+id/insertImage"
         android:onClick="insertImage"
         android:title="@string/insertImage_command"/>
+    <item android:id="@+id/getPreviewImage"
+        android:onClick="getPreviewImage"
+        android:title="@string/getPreview_command"/>
+    <item android:id="@+id/getSceneImage"
+        android:onClick="getSceneImage"
+        android:title="@string/getSceneImage_command"/>
     <item android:id="@+id/getScene"
         android:onClick="getScene"
         android:title="@string/getScene_command"/>
@@ -42,6 +65,9 @@
     <item android:id="@+id/disableReadonly"
         android:onClick="disableReadonly"
         android:title="@string/disableReadonly_command"/>
+    <item android:id="@+id/text"
+        android:onClick="textarea"
+        android:title="@string/textarea_command"/>
     <item android:id="@+id/pencil"
         android:onClick="pencil"
         android:title="@string/pencil_command"/>

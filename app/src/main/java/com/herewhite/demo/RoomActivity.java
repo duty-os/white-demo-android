@@ -3,6 +3,7 @@ package com.herewhite.demo;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -20,6 +21,7 @@ import java.util.HashMap;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+import wendu.dsbridge.DWebView;
 
 import static com.herewhite.demo.DemoAPI.TEST_ROOM_TOKEN;
 import static com.herewhite.demo.DemoAPI.TEST_UUID;
@@ -32,6 +34,7 @@ public class RoomActivity extends AppCompatActivity {
     final String SCENE_DIR = "/dir";
     final String ROOM_INFO = "room info";
     final String ROOM_ACTION = "room action";
+    private String roomToken;
 
     WhiteBroadView whiteBroadView;
     Room room;
@@ -41,8 +44,9 @@ public class RoomActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.js);
+        setContentView(R.layout.activity_room);
         whiteBroadView = findViewById(R.id.white);
+        DWebView.setWebContentsDebuggingEnabled(true);
         Intent intent = getIntent();
         String uuid = intent.getStringExtra(StartActivity.EXTRA_MESSAGE);
         if (uuid == null) {
@@ -87,6 +91,7 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     private void createRoom() {
+        final RoomActivity that = this;
         demoAPI.createRoom("sdk demo", 100, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -100,6 +105,7 @@ public class RoomActivity extends AppCompatActivity {
                         JsonObject room = gson.fromJson(response.body().string(), JsonObject.class);
                         String uuid = room.getAsJsonObject("msg").getAsJsonObject("room").get("uuid").getAsString();
                         String roomToken = room.getAsJsonObject("msg").get("roomToken").getAsString();
+                        that.roomToken = roomToken;
                         if (whiteBroadView.getEnv() == Environment.dev) {
                             joinRoom(TEST_UUID, TEST_ROOM_TOKEN);
                         } else {
@@ -116,6 +122,7 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     private void getRoomToken(final String uuid) {
+        final RoomActivity that = this;
         demoAPI.getRoomToken(uuid, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -125,10 +132,10 @@ public class RoomActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) {
                 try {
-
                     if (response.code() == 200) {
                         JsonObject room = gson.fromJson(response.body().string(), JsonObject.class);
                         String roomToken = room.getAsJsonObject("msg").get("roomToken").getAsString();
+                        that.roomToken = roomToken;
                         if (whiteBroadView.getEnv() == Environment.dev) {
                             joinRoom(TEST_UUID, TEST_ROOM_TOKEN);
                         } else {
@@ -146,14 +153,16 @@ public class RoomActivity extends AppCompatActivity {
 
     private void joinRoom(String uuid, String roomToken) {
 
-        logRoomInfo("room uuid: " + uuid + "roomToken" + roomToken);
+        logRoomInfo("room uuid: " + uuid + "\nroomToken: " + roomToken);
 
         WhiteSdkConfiguration sdkConfiguration = new WhiteSdkConfiguration(DeviceType.touch, 10, 0.1, true);
         /*显示用户头像*/
         sdkConfiguration.setUserCursor(true);
-        /*接受用户头像信息回调，自己实现头像回调。会导致 UserCursor 设置失效。*/
-        sdkConfiguration.setCustomCursor(true);
-
+        HashMap<String, String> map = new HashMap<>();
+        map.put("Calibri", "https://your-cdn.com/Calibri.ttf");
+        map.put("宋体","https://your-cdn.com/Songti.ttf");
+        map.put("楷体",  "https://your-cdn.com/Kaiti.ttf");
+        sdkConfiguration.setFont(map);
         WhiteSdk whiteSdk = new WhiteSdk(
                 whiteBroadView,
                 RoomActivity.this,
@@ -200,6 +209,102 @@ public class RoomActivity extends AppCompatActivity {
         });
     }
 
+    public void nextScene(MenuItem item) {
+        room.getSceneState(new Promise<SceneState>() {
+            @Override
+            public void then(SceneState sceneState) {
+                room.setSceneIndex(sceneState.getIndex() + 1, new Promise<Boolean>() {
+                    @Override
+                    public void then(Boolean aBoolean) {
+
+                    }
+
+                    @Override
+                    public void catchEx(SDKError t) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void catchEx(SDKError t) {
+
+            }
+        });
+    }
+
+    public void getPreviewImage(MenuItem item) {
+        room.getScenePreviewImage("/init", new Promise<Bitmap>() {
+            @Override
+            public void then(Bitmap bitmap) {
+                logAction("get bitmap");
+            }
+
+            @Override
+            public void catchEx(SDKError t) {
+                logAction("get bitmap error");
+            }
+        });
+    }
+
+    public void getSceneImage(MenuItem item) {
+        room.getSceneSnapshotImage("/init", new Promise<Bitmap>() {
+            @Override
+            public void then(Bitmap bitmap) {
+                logAction("get bitmap");
+            }
+
+            @Override
+            public void catchEx(SDKError t) {
+                logAction("get bitmap error");
+            }
+        });
+    }
+
+    public void staticConvert(MenuItem item) {
+        Converter c = new Converter(this.roomToken);
+        c.startConvertTask("https://white-cn-edge-doc-convert.oss-cn-hangzhou.aliyuncs.com/LightWaves.pdf", Converter.ConvertType.Static, new ConverterCallbacks(){
+            @Override
+            public void onFailure(ConvertException e) {
+                logAction(e.getMessage());
+            }
+
+            @Override
+            public void onFinish(ConvertedFiles ppt, ConversionInfo convertInfo) {
+                room.putScenes("/static", ppt.getScenes(), 0);
+                room.setScenePath("/static/1");
+                logAction(convertInfo.toString());
+            }
+
+            @Override
+            public void onProgress(Double progress, ConversionInfo convertInfo) {
+                logAction(String.valueOf(progress));
+            }
+        });
+    }
+
+    public void dynamicConvert(MenuItem item) {
+        Converter c = new Converter(this.roomToken);
+        c.startConvertTask("https://white-cn-edge-doc-convert.oss-cn-hangzhou.aliyuncs.com/-1/1.pptx", Converter.ConvertType.Dynamic, new ConverterCallbacks(){
+            @Override
+            public void onFailure(ConvertException e) {
+                logAction(e.getMessage());
+            }
+
+            @Override
+            public void onFinish(ConvertedFiles ppt, ConversionInfo convertInfo) {
+                room.putScenes("/dynamic", ppt.getScenes(), 0);
+                room.setScenePath("/dynamic/1");
+                logAction(convertInfo.toString());
+            }
+
+            @Override
+            public void onProgress(Double progress, ConversionInfo convertInfo) {
+                logAction(String.valueOf(progress));
+            }
+        });
+    }
+
     public void broadcast(MenuItem item) {
         logAction();
         room.setViewMode(ViewMode.Broadcaster);
@@ -221,9 +326,22 @@ public class RoomActivity extends AppCompatActivity {
         });
     }
 
+    public void moveCamera(MenuItem item) {
+        logAction();
+        CameraConfig config = new CameraConfig();
+        config.setCenterX(100d);
+        room.moveCamera(config);
+    }
+
+    public void moveRectangle(MenuItem item) {
+        logAction();
+        RectangleConfig config = new RectangleConfig(200d, 400d);
+        room.moveCameraToContainer(config);
+    }
+
     public void dispatchCustomEvent(MenuItem item) {
         logAction();
-        HashMap payload = new HashMap<>();
+        HashMap<String, String> payload = new HashMap<>();
         payload.put("device", "android");
 
         room.dispatchMagixEvent(new AkkoEvent(EVENT_NAME, payload));
@@ -329,6 +447,16 @@ public class RoomActivity extends AppCompatActivity {
         room.disableOperations(false);
     }
 
+    public void textarea(MenuItem item) {
+        logAction();
+        MemberState memberState = new MemberState();
+        memberState.setStrokeColor(new int[]{99, 99, 99});
+        memberState.setCurrentApplianceName(Appliance.TEXT);
+        memberState.setStrokeWidth(10);
+        memberState.setTextSize(10);
+        room.setMemberState(memberState);
+    }
+
     public void pencil(MenuItem item) {
         logAction();
         MemberState memberState = new MemberState();
@@ -376,14 +504,6 @@ public class RoomActivity extends AppCompatActivity {
 
     public void externalEvent(MenuItem item) {
         logAction();
-        room.disableOperations(true);
-        room.externalDeviceEventDown(new RoomMouseEvent(100, 300));
-        room.externalDeviceEventMove(new RoomMouseEvent(100, 400));
-        room.externalDeviceEventMove(new RoomMouseEvent(100, 500));
-        room.externalDeviceEventMove(new RoomMouseEvent(100, 600));
-        room.externalDeviceEventMove(new RoomMouseEvent(100, 700));
-        room.externalDeviceEventUp(new RoomMouseEvent(100, 700));
-        room.disableOperations(false);
     }
 
     public void zoomChange(MenuItem item) {

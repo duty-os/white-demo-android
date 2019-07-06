@@ -15,7 +15,7 @@
     <string name="insertImage_command">插入图片</string>
     <string name="getScene_command">获取 Scene 状态</string>
     <string name="getRoomPhase_command">获取房间连接状态</string>
-    <string name="getRoomState_command">获取房间连接状态</string>
+    <string name="getRoomState_command">获取房间状态</string>
     <string name="disconnect_command">断开连接</string>
     <string name="readonly_command">只读</string>
     <string name="disableReadonly_command">取消只读</string>
@@ -25,4 +25,14 @@
     <string name="externalEvent_command">外部设备输入</string>
     <string name="zoomChange_command">缩放</string>
     <string name="color_command">颜色</string>
+    <string name="getTimeInfo_command">获取时间信息</string>
+    <string name="getPlayState_command">获取播放信息</string>
+    <string name="getPhase_command">获取播放状态</string>
+    <string name="seek_command">快进</string>
+    <string name="textarea_command">文本</string>
+    <string name="staticConvert">静态转换</string>
+    <string name="dynamicConvert">动态转换</string>
+    <string name="next_scene">下一页</string>
+    <string name="getPreview_command">获取预览截图</string>
+    <string name="getSceneImage_command">获取场景封面</string>
 </resources>

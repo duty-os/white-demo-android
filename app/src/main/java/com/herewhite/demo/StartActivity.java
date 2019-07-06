@@ -29,9 +29,13 @@ public class StartActivity extends AppCompatActivity {
     }
 
     public void tokenAlert() {
+        tokenAlert("token", "请在 https://console.herewhite.com 中注册，并获取 sdk token，再进行使用");
+    }
+
+    public void tokenAlert(String title, String message) {
         AlertDialog alertDialog = new AlertDialog.Builder(StartActivity.this).create();
-        alertDialog.setTitle("Token");
-        alertDialog.setMessage("请在 https://console.herewhite.com 中注册，并获取 sdk token，再进行使用");
+        alertDialog.setTitle(title);
+        alertDialog.setMessage(message);
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -67,12 +71,13 @@ public class StartActivity extends AppCompatActivity {
             tokenAlert();
             return;
         }
-        Intent intent = new Intent(this, RoomActivity.class);
+//        f892bd37ba6c4031a8e59b52d308f829
+        Intent intent = new Intent(this, PlayActivity.class);
         if (getUuid().length() > 0) {
             intent.putExtra(EXTRA_MESSAGE, getUuid());
             startActivity(intent);
         } else {
-            Log.w("error", "none uuid");
+            tokenAlert("uuid", "请填入回放用 uuid");
         }
     }
 }
