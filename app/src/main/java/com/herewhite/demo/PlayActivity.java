@@ -5,7 +5,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -21,7 +24,7 @@ import okhttp3.Response;
 
 public class PlayActivity extends AppCompatActivity {
 
-    private WhiteBroadView whiteBroadView;
+    private WhiteBroadView whiteboardView;
     Player player;
     Gson gson = new Gson();
 
@@ -29,10 +32,11 @@ public class PlayActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
+
         Intent intent = getIntent();
         final String uuid = intent.getStringExtra(StartActivity.EXTRA_MESSAGE);
         if (uuid != null) {
-            whiteBroadView = findViewById(R.id.white);
+            whiteboardView = findViewById(R.id.white);
 
             new DemoAPI().getRoomToken(uuid, new Callback() {
                 @Override
@@ -58,6 +62,37 @@ public class PlayActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.replayer_command, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return true;
+    }
+
+    public void getTimeInfo(MenuItem item) {
+        Log.i("getTimeInfo", gson.toJson(player.getPlayerTimeInfo()));
+    }
+
+    public void getPlayState(MenuItem item) {
+        Log.i("getPlayState", gson.toJson(player.getPlayerState()));
+    }
+
+    public void getPhase(MenuItem item) {
+        Log.i("getPhase", gson.toJson(player.getPlayerPhase()));
+    }
+
+    public void seek(MenuItem item) {
+        if (player.getPlayerPhase().equals(PlayerPhase.waitingFirstFrame)) {
+            return;
+        } else {
+            player.seekToScheduleTime(3 * 1000);
+        }
+    }
+
     public void alert(final String title, final String detail) {
 
         runOnUiThread(new Runnable() {
@@ -79,7 +114,7 @@ public class PlayActivity extends AppCompatActivity {
 
     private void player(String uuid, String roomToken) {
         WhiteSdk whiteSdk = new WhiteSdk(
-                whiteBroadView,
+                whiteboardView,
                 PlayActivity.this,
                 new WhiteSdkConfiguration(DeviceType.touch, 10, 0.1, true),
                 new UrlInterrupter() {
@@ -96,11 +131,13 @@ public class PlayActivity extends AppCompatActivity {
         whiteSdk.createPlayer(playerConfiguration, new AbstractPlayerEventListener() {
             @Override
             public void onPhaseChanged(PlayerPhase phase) {
+                Log.i("player info", "onPhaseChanged: " + phase);
                 showToast(gson.toJson(phase));
             }
 
             @Override
             public void onLoadFirstFrame() {
+                Log.i("onLoadFirstFrame", "onLoadFirstFrame: ");
                 showToast("onLoadFirstFrame");
             }
 
@@ -148,6 +185,7 @@ public class PlayActivity extends AppCompatActivity {
     }
 
     void showToast(Object o) {
+        Log.i("showToast", o.toString());
         Toast.makeText(this, o.toString(), Toast.LENGTH_SHORT).show();
     }
 }
