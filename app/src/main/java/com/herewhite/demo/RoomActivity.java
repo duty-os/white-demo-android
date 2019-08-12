@@ -36,7 +36,7 @@ public class RoomActivity extends AppCompatActivity {
     final String ROOM_ACTION = "room action";
     private String roomToken;
 
-    WhiteBroadView whiteBroadView;
+    WhiteBroadView whiteboardView;
     Room room;
     Gson gson = new Gson();
     DemoAPI demoAPI = new DemoAPI();
@@ -45,7 +45,7 @@ public class RoomActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_room);
-        whiteBroadView = findViewById(R.id.white);
+        whiteboardView = findViewById(R.id.white);
         DWebView.setWebContentsDebuggingEnabled(true);
         Intent intent = getIntent();
         String uuid = intent.getStringExtra(StartActivity.EXTRA_MESSAGE);
@@ -64,10 +64,6 @@ public class RoomActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.broadcast:
-                break;
-        }
         return true;
     }
 
@@ -106,7 +102,7 @@ public class RoomActivity extends AppCompatActivity {
                         String uuid = room.getAsJsonObject("msg").getAsJsonObject("room").get("uuid").getAsString();
                         String roomToken = room.getAsJsonObject("msg").get("roomToken").getAsString();
                         that.roomToken = roomToken;
-                        if (whiteBroadView.getEnv() == Environment.dev) {
+                        if (whiteboardView.getEnv() == Environment.dev) {
                             joinRoom(TEST_UUID, TEST_ROOM_TOKEN);
                         } else {
                             joinRoom(uuid, roomToken);
@@ -136,7 +132,7 @@ public class RoomActivity extends AppCompatActivity {
                         JsonObject room = gson.fromJson(response.body().string(), JsonObject.class);
                         String roomToken = room.getAsJsonObject("msg").get("roomToken").getAsString();
                         that.roomToken = roomToken;
-                        if (whiteBroadView.getEnv() == Environment.dev) {
+                        if (whiteboardView.getEnv() == Environment.dev) {
                             joinRoom(TEST_UUID, TEST_ROOM_TOKEN);
                         } else {
                             joinRoom(uuid, roomToken);
@@ -164,7 +160,7 @@ public class RoomActivity extends AppCompatActivity {
         map.put("楷体",  "https://your-cdn.com/Kaiti.ttf");
         sdkConfiguration.setFont(map);
         WhiteSdk whiteSdk = new WhiteSdk(
-                whiteBroadView,
+                whiteboardView,
                 RoomActivity.this,
                 sdkConfiguration,
                 new UrlInterrupter() {
@@ -211,9 +207,9 @@ public class RoomActivity extends AppCompatActivity {
 
     public void nextScene(MenuItem item) {
         int nextIndex = room.getSceneState().getIndex() + 1;
-        room.setSceneIndex(nextIndex, new Promise() {
+        room.setSceneIndex(nextIndex, new Promise<Boolean>() {
             @Override
-            public void then(Object o) {
+            public void then(Boolean result) {
 
             }
 
@@ -488,6 +484,7 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     void showToast(Object o) {
+        Log.i("showToast", o.toString());
         Toast.makeText(this, o.toString(), Toast.LENGTH_SHORT).show();
     }
 }
