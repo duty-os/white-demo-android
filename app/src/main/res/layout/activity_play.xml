@@ -7,7 +7,7 @@
     android:orientation="vertical"
     tools:context=".PlayActivity">
 
-    <com.herewhite.sdk.WhiteboardView
+    <com.herewhite.sdk.WhiteBroadView
         android:id="@+id/white"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
