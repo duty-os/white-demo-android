@@ -36,10 +36,25 @@ public class RoomActivity extends AppCompatActivity {
     final String ROOM_ACTION = "room action";
     private String roomToken;
 
-    WhiteBroadView whiteboardView;
+    WhiteboardView whiteboardView;
     Room room;
     Gson gson = new Gson();
     DemoAPI demoAPI = new DemoAPI();
+
+    /**
+     * 自定义 GlobalState 示例
+     */
+    class MyGlobalState extends GlobalState {
+        public String getOne() {
+            return one;
+        }
+
+        public void setOne(String one) {
+            this.one = one;
+        }
+
+        String one;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,6 +184,8 @@ public class RoomActivity extends AppCompatActivity {
                         return sourceUrl;
                     }
                 });
+        /** 设置自定义全局状态，在后续回调中 GlobalState 直接进行类型转换即可 */
+        WhiteDisplayerState.setCustomGlobalStateClass(MyGlobalState.class);
 
         whiteSdk.joinRoom(new RoomParams(uuid, roomToken), new AbstractRoomCallbacks() {
             @Override
@@ -351,17 +368,7 @@ public class RoomActivity extends AppCompatActivity {
 
     public void getScene(MenuItem item) {
         logAction();
-        room.getScenes(new Promise<Scene[]>() {
-            @Override
-            public void then(Scene[] scenes) {
-                logRoomInfo(gson.toJson(scenes));
-            }
-
-            @Override
-            public void catchEx(SDKError t) {
-
-            }
-        });
+        logAction(room.getScenes().toString());
     }
 
     public void getRoomPhase(MenuItem item) {
@@ -464,11 +471,13 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     public void zoomChange(MenuItem item) {
+        CameraConfig cameraConfig = new CameraConfig();
         if (room.getZoomScale() != 1) {
-            room.zoomChange(1);
+            cameraConfig.setScale(1d);
         } else {
-            room.zoomChange(5);
+            cameraConfig.setScale(5d);
         }
+        room.moveCamera(cameraConfig);
     }
 
     void logRoomInfo(String str) {

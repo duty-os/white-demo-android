@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,7 +23,7 @@ import okhttp3.Response;
 
 public class PlayActivity extends AppCompatActivity {
 
-    private WhiteBroadView whiteboardView;
+    private WhiteboardView whiteboardView;
     Player player;
     Gson gson = new Gson();
 

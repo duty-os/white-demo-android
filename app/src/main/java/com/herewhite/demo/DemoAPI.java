@@ -2,7 +2,6 @@ package com.herewhite.demo;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.herewhite.sdk.Environment;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -35,8 +34,8 @@ public class DemoAPI {
     }
 
     public interface Result {
-        public void success(String uuid, String roomToken);
-        public void fail(String message);
+        void success(String uuid, String roomToken);
+        void fail(String message);
     }
 
     public void getRoom(final Result result) {
