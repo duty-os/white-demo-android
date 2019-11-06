@@ -3,13 +3,17 @@ package com.herewhite.demo;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.herewhite.sdk.*;
@@ -173,7 +177,7 @@ public class RoomActivity extends AppCompatActivity {
         map.put("Calibri", "https://your-cdn.com/Calibri.ttf");
         map.put("宋体","https://your-cdn.com/Songti.ttf");
         map.put("楷体",  "https://your-cdn.com/Kaiti.ttf");
-        sdkConfiguration.setFont(map);
+        sdkConfiguration.setFonts(map);
         WhiteSdk whiteSdk = new WhiteSdk(
                 whiteboardView,
                 RoomActivity.this,
@@ -187,7 +191,9 @@ public class RoomActivity extends AppCompatActivity {
         /** 设置自定义全局状态，在后续回调中 GlobalState 直接进行类型转换即可 */
         WhiteDisplayerState.setCustomGlobalStateClass(MyGlobalState.class);
 
-        whiteSdk.joinRoom(new RoomParams(uuid, roomToken), new AbstractRoomCallbacks() {
+        RoomParams roomParams = new RoomParams(uuid, roomToken);
+
+        whiteSdk.joinRoom(roomParams, new AbstractRoomCallbacks() {
             @Override
             public void onPhaseChanged(RoomPhase phase) {
                 showToast(phase.name());
@@ -212,6 +218,19 @@ public class RoomActivity extends AppCompatActivity {
         });
     }
 
+    private CameraBound customBound(double maxScale) {
+        CameraBound bound = new CameraBound();
+        bound.setCenterX(0d);
+        bound.setCenterY(0d);
+        bound.setHeight(Double.valueOf(whiteboardView.getHeight() / this.getResources().getDisplayMetrics().density));
+        bound.setWidth(Double.valueOf(whiteboardView.getWidth() / this.getResources().getDisplayMetrics().density));
+        ContentModeConfig contentModeConfig = new ContentModeConfig();
+        contentModeConfig.setScale(maxScale);
+        contentModeConfig.setMode(ContentModeConfig.ScaleMode.CENTER_INSIDE_SCALE);
+        bound.setMaxContentMode(contentModeConfig);
+        return bound;
+    }
+
     private void addCustomEventListener() {
         room.addMagixEventListener(EVENT_NAME, new EventListener() {
             @Override
@@ -220,6 +239,33 @@ public class RoomActivity extends AppCompatActivity {
                 showToast(gson.toJson(eventEntry.getPayload()));
             }
         });
+    }
+
+    public void orientation(MenuItem item) {
+        if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+            RoomActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        } else {
+            RoomActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+    }
+
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        logRoomInfo( "width:" + whiteboardView.getWidth() / getResources().getDisplayMetrics().density + " height: " + whiteboardView.getHeight() / getResources().getDisplayMetrics().density);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                room.refreshViewSize();
+                logRoomInfo( "width:" + whiteboardView.getWidth() / getResources().getDisplayMetrics().density + " height: " + whiteboardView.getHeight() / getResources().getDisplayMetrics().density);
+            }
+        }, 1000);
+    }
+
+    public void setBound(MenuItem item) {
+        CameraBound bound = customBound(3);
+        room.setCameraBound(bound);
     }
 
     public void nextScene(MenuItem item) {
@@ -368,7 +414,7 @@ public class RoomActivity extends AppCompatActivity {
 
     public void getScene(MenuItem item) {
         logAction();
-        logAction(room.getScenes().toString());
+        logAction(gson.toJson(room.getScenes()));
     }
 
     public void getRoomPhase(MenuItem item) {
