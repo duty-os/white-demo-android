@@ -14,12 +14,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.alibaba.sdk.android.httpdns.HttpDns;
+import com.alibaba.sdk.android.httpdns.HttpDnsService;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.herewhite.sdk.*;
 import com.herewhite.sdk.domain.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import okhttp3.Call;
@@ -39,6 +43,7 @@ public class RoomActivity extends AppCompatActivity {
     final String ROOM_INFO = "room info";
     final String ROOM_ACTION = "room action";
     private String roomToken;
+    private static HttpDnsService httpdns;
 
     WhiteboardView whiteboardView;
     Room room;
@@ -65,6 +70,11 @@ public class RoomActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_room);
         whiteboardView = findViewById(R.id.white);
+
+        // 阿里云 httpdns 替换
+        httpdns = HttpDns.getService(getApplicationContext(), "188301");
+        httpdns.setPreResolveHosts(new ArrayList<>(Arrays.asList("expresscloudharestoragev2.herewhite.com", "cloudharev2.herewhite.com", "scdncloudharestoragev3.herewhite.com", "cloudcapiv4.herewhite.com")));
+        whiteboardView.setWebViewClient(new WhiteWebviewClient(httpdns));
         DWebView.setWebContentsDebuggingEnabled(true);
         Intent intent = getIntent();
         String uuid = intent.getStringExtra(StartActivity.EXTRA_MESSAGE);

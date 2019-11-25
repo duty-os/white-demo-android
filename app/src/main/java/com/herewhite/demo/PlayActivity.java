@@ -13,12 +13,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.alibaba.sdk.android.httpdns.HttpDns;
+import com.alibaba.sdk.android.httpdns.HttpDnsService;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.herewhite.sdk.*;
 import com.herewhite.sdk.domain.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -29,6 +33,7 @@ public class PlayActivity extends AppCompatActivity {
     private WhiteboardView whiteboardView;
     Player player;
     Gson gson = new Gson();
+    private static HttpDnsService httpdns;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +44,10 @@ public class PlayActivity extends AppCompatActivity {
         final String uuid = intent.getStringExtra(StartActivity.EXTRA_MESSAGE);
         if (uuid != null) {
             whiteboardView = findViewById(R.id.white);
+// 阿里云 httpdns 替换
+            httpdns = HttpDns.getService(getApplicationContext(), "188301");
+            httpdns.setPreResolveHosts(new ArrayList<>(Arrays.asList("expresscloudharestoragev2.herewhite.com", "cloudharev2.herewhite.com", "scdncloudharestoragev3.herewhite.com", "cloudcapiv4.herewhite.com")));
+            whiteboardView.setWebViewClient(new WhiteWebviewClient(httpdns));
 
             new DemoAPI().getRoomToken(uuid, new Callback() {
                 @Override
