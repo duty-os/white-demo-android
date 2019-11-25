@@ -31,5 +31,6 @@ dependencies {
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    implementation 'com.aliyun.ams:alicloud-android-httpdns:1.2.5'
     testImplementation 'junit:junit:4.12'
 }
