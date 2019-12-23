@@ -11,6 +11,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SurfaceView;
+import android.webkit.WebView;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.alibaba.sdk.android.httpdns.HttpDns;
@@ -18,11 +21,13 @@ import com.alibaba.sdk.android.httpdns.HttpDnsService;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.herewhite.sdk.*;
+import com.herewhite.sdk.CombinePlayer.PlayerSyncManager;
 import com.herewhite.sdk.domain.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -32,16 +37,46 @@ public class PlayActivity extends AppCompatActivity {
 
     private WhiteboardView whiteboardView;
     Player player;
+    NativeMediaPlayer nativePlayer;
+    /**
+     * 如果有不需要音视频混合播放，可以直接操作 Player
+     */
+    PlayerSyncManager playerSyncManager;
     Gson gson = new Gson();
     private static HttpDnsService httpdns;
+    private boolean mUserIsSeeking = false;
+    private SeekBar mSeekBar;
+
+    private Handler mSeekBarUpdateHandler = new Handler();
+    private Runnable mUpdateSeekBar = new Runnable() {
+        @Override
+        public void run() {
+            if (!nativePlayer.isNormalState() || mUserIsSeeking) {
+                return;
+            }
+            Float progress = Float.valueOf(nativePlayer.getCurrentPosition()) / nativePlayer.getDuration() * 100;
+            Log.i("nativePlayer", "progress: " + progress );
+            mSeekBar.setProgress(progress.intValue());
+            mSeekBarUpdateHandler.postDelayed(this, 100);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
+        mSeekBar = findViewById(R.id.player_seek_bar);
 
         Intent intent = getIntent();
         final String uuid = intent.getStringExtra(StartActivity.EXTRA_MESSAGE);
+
+        try {
+            nativePlayer = new NativeMediaPlayer(this, "http://archive.org/download/BigBuckBunny_328/BigBuckBunny_512kb.mp4");
+            Log.e("nativePlayer", "create success");
+        } catch (Throwable e) {
+            Log.e("nativePlayer", "create fail");
+        }
+
         if (uuid != null) {
             whiteboardView = findViewById(R.id.white);
 // 阿里云 httpdns 替换
@@ -73,6 +108,7 @@ public class PlayActivity extends AppCompatActivity {
         }
     }
 
+    //region Menu Item
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.replayer_command, menu);
@@ -96,13 +132,91 @@ public class PlayActivity extends AppCompatActivity {
         Log.i("getPhase", gson.toJson(player.getPlayerPhase()));
     }
 
+
+    public void play(MenuItem item) {
+        if (playerSyncManager != null) {
+            playerSyncManager.play();
+        }
+    }
+
+    public void pause(MenuItem item) {
+        if (playerSyncManager != null) {
+            playerSyncManager.pause();
+        }
+    }
+
     public void seek(MenuItem item) {
         if (player.getPlayerPhase().equals(PlayerPhase.waitingFirstFrame)) {
             return;
         } else {
-            player.seekToScheduleTime(3 * 1000);
+            //12秒的视频画面，区别明显；白板画面，看不出来，要看 scheduleTime 变化
+            nativePlayer.seek(12, TimeUnit.SECONDS);
         }
     }
+
+    //endregion
+
+    //region private
+    public void play() {
+        if (playerSyncManager != null) {
+            playerSyncManager.play();
+            mSeekBarUpdateHandler.removeCallbacks(mUpdateSeekBar);
+            mSeekBarUpdateHandler.postDelayed(mUpdateSeekBar, 100);
+        }
+    }
+
+    public void pause() {
+        if (playerSyncManager != null) {
+            playerSyncManager.pause();
+            mSeekBarUpdateHandler.removeCallbacks(mUpdateSeekBar);
+        }
+    }
+
+    //region action
+
+    public void play(android.view.View button) {
+        play();
+    }
+
+    public void pause(android.view.View button) {
+        pause();
+    }
+
+    public void rest(android.view.View button) {
+        if (nativePlayer != null) {
+            nativePlayer.seek(0, TimeUnit.SECONDS);
+        }
+    }
+
+    private void setupSeekBar() {
+        SeekBar seekBar = findViewById(R.id.player_seek_bar);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int userSelectedPosition = 0;
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                mUserIsSeeking = true;
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    userSelectedPosition = progress;
+                }
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                mUserIsSeeking = false;
+                if (nativePlayer != null && nativePlayer.isNormalState()) {
+                    Float progress = userSelectedPosition / 100.f * nativePlayer.getDuration();
+                    nativePlayer.seek(progress.intValue(), TimeUnit.SECONDS);
+                }
+            }
+        });
+    }
+
+    //endregion
 
     public void alert(final String title, final String detail) {
 
@@ -136,14 +250,15 @@ public class PlayActivity extends AppCompatActivity {
                 });
 
         PlayerConfiguration playerConfiguration = new PlayerConfiguration(uuid, roomToken);
-        //TODO:提供更正式的 m3u8
-//        playerConfiguration.setAudioUrl("https://ohuuyffq2.qnssl.com/98398e2c5a43d74321214984294c157e_60def9bac25e4a378235f6249cae63c1.m3u8");
 
         whiteSdk.createPlayer(playerConfiguration, new AbstractPlayerEventListener() {
             @Override
             public void onPhaseChanged(PlayerPhase phase) {
                 Log.i("player info", "onPhaseChanged: " + phase);
                 showToast(gson.toJson(phase));
+                if (playerSyncManager != null) {
+                    playerSyncManager.updateWhitePlayerPhase(phase);
+                }
             }
 
             @Override
@@ -169,7 +284,7 @@ public class PlayActivity extends AppCompatActivity {
 
             @Override
             public void onScheduleTimeChanged(long time) {
-                Log.i("onScheduleTimeChanged", String.valueOf(time));
+//                Log.i("onScheduleTimeChanged", String.valueOf(time));
             }
 
             @Override
@@ -184,8 +299,24 @@ public class PlayActivity extends AppCompatActivity {
         }, new Promise<Player>() {
             @Override
             public void then(Player wPlayer) {
-                wPlayer.play();
                 player = wPlayer;
+                playerSyncManager = new PlayerSyncManager(player, nativePlayer, new PlayerSyncManager.Callbacks() {
+                    @Override
+                    public void startBuffering() {
+                        showToast("startBuffering");
+                    }
+
+                    @Override
+                    public void endBuffering() {
+                        showToast("endBuffering");
+                    }
+                });
+                setupSeekBar();
+                SurfaceView surfaceView = findViewById(R.id.surfaceView);
+                nativePlayer.setSurfaceView(surfaceView);
+                nativePlayer.setPlayerSyncManager(playerSyncManager);
+                playerSyncManager.play();
+                mSeekBarUpdateHandler.postDelayed(mUpdateSeekBar, 0);
             }
 
             @Override
