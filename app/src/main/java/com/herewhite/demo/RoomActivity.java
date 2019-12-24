@@ -18,8 +18,42 @@ import com.alibaba.sdk.android.httpdns.HttpDns;
 import com.alibaba.sdk.android.httpdns.HttpDnsService;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.herewhite.sdk.*;
-import com.herewhite.sdk.domain.*;
+import com.herewhite.sdk.domain.Scene;
+import com.herewhite.sdk.AbstractRoomCallbacks;
+import com.herewhite.sdk.Converter;
+import com.herewhite.sdk.ConverterCallbacks;
+import com.herewhite.sdk.Environment;
+import com.herewhite.sdk.Logger;
+import com.herewhite.sdk.Room;
+import com.herewhite.sdk.RoomParams;
+import com.herewhite.sdk.WhiteSdk;
+import com.herewhite.sdk.WhiteSdkConfiguration;
+import com.herewhite.sdk.WhiteboardView;
+import com.herewhite.sdk.domain.Point;
+import com.herewhite.sdk.domain.EventListener;
+import com.herewhite.sdk.domain.AkkoEvent;
+import com.herewhite.sdk.domain.Appliance;
+import com.herewhite.sdk.domain.BroadcastState;
+import com.herewhite.sdk.domain.CameraBound;
+import com.herewhite.sdk.domain.CameraConfig;
+import com.herewhite.sdk.domain.ContentModeConfig;
+import com.herewhite.sdk.domain.ConversionInfo;
+import com.herewhite.sdk.domain.ConvertException;
+import com.herewhite.sdk.domain.ConvertedFiles;
+import com.herewhite.sdk.domain.DeviceType;
+import com.herewhite.sdk.domain.EventEntry;
+import com.herewhite.sdk.domain.GlobalState;
+import com.herewhite.sdk.domain.ImageInformationWithUrl;
+import com.herewhite.sdk.domain.MemberState;
+import com.herewhite.sdk.domain.PptPage;
+import com.herewhite.sdk.domain.Promise;
+import com.herewhite.sdk.domain.RectangleConfig;
+import com.herewhite.sdk.domain.RoomPhase;
+import com.herewhite.sdk.domain.RoomState;
+import com.herewhite.sdk.domain.SDKError;
+import com.herewhite.sdk.domain.UrlInterrupter;
+import com.herewhite.sdk.domain.ViewMode;
+import com.herewhite.sdk.domain.WhiteDisplayerState;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,6 +76,7 @@ public class RoomActivity extends AppCompatActivity {
     final String SCENE_DIR = "/dir";
     final String ROOM_INFO = "room info";
     final String ROOM_ACTION = "room action";
+    private String uuid;
     private String roomToken;
     private static HttpDnsService httpdns;
 
@@ -177,9 +212,9 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     private void joinRoom(String uuid, String roomToken) {
-
         logRoomInfo("room uuid: " + uuid + "\nroomToken: " + roomToken);
-
+        this.uuid = uuid;
+        this.roomToken = roomToken;
         WhiteSdkConfiguration sdkConfiguration = new WhiteSdkConfiguration(DeviceType.touch, 10, 0.1, true);
         /*显示用户头像*/
         sdkConfiguration.setUserCursor(true);
@@ -247,6 +282,21 @@ public class RoomActivity extends AppCompatActivity {
             public void onEvent(EventEntry eventEntry) {
                 logRoomInfo("customEvent payload: " + eventEntry.getPayload().toString());
                 showToast(gson.toJson(eventEntry.getPayload()));
+            }
+        });
+    }
+
+    public void reconnect(MenuItem item) {
+        final RoomActivity that = this;
+        room.disconnect(new Promise<Object>() {
+            @Override
+            public void then(Object b) {
+                joinRoom(that.uuid, that.roomToken);
+            }
+
+            @Override
+            public void catchEx(SDKError t) {
+
             }
         });
     }
