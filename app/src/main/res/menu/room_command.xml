@@ -15,6 +15,9 @@
     <item android:id="@+id/broadcast"
         android:onClick="broadcast"
         android:title="@string/broadcast_command"/>
+    <item android:id="@+id/scalePptToFit"
+        android:onClick="scalePptToFit"
+        android:title="铺满 ppt"/>
     <item android:id="@+id/getBroadcastState"
         android:onClick="getBroadcastState"
         android:title="@string/getBroadcastState_command"/>
@@ -75,7 +78,7 @@
         android:onClick="disableReadonly"
         android:title="@string/disableReadonly_command"/>
     <item android:id="@+id/text"
-        android:onClick="textarea"
+        android:onClick="textArea"
         android:title="@string/textarea_command"/>
     <item android:id="@+id/pencil"
         android:onClick="pencil"

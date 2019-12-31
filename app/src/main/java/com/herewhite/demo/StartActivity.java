@@ -59,8 +59,11 @@ public class StartActivity extends AppCompatActivity {
             return;
         }
         Intent intent = new Intent(this, RoomActivity.class);
-        if (getUuid().length() > 0) {
-            intent.putExtra(EXTRA_MESSAGE, getUuid());
+
+//        String uuid = "fb4b7e680fcf46cf8aa02988908f2531";
+        String uuid = getUuid();
+        if (uuid.length() > 0) {
+            intent.putExtra(EXTRA_MESSAGE, uuid);
         }
         startActivity(intent);
     }
@@ -70,10 +73,13 @@ public class StartActivity extends AppCompatActivity {
             tokenAlert();
             return;
         }
-//        f892bd37ba6c4031a8e59b52d308f829
+
         Intent intent = new Intent(this, PlayActivity.class);
-        if (getUuid().length() > 0) {
-            intent.putExtra(EXTRA_MESSAGE, getUuid());
+        
+//        String uuid = "fb4b7e680fcf46cf8aa02988908f2531";
+        String uuid = getUuid();
+        if (uuid.length() > 0) {
+            intent.putExtra(EXTRA_MESSAGE, uuid);
             startActivity(intent);
         } else {
             tokenAlert("uuid", "请填入回放用 uuid");
