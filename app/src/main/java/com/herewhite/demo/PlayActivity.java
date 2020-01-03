@@ -76,7 +76,7 @@ public class PlayActivity extends AppCompatActivity {
         final String uuid = intent.getStringExtra(StartActivity.EXTRA_MESSAGE);
 
         try {
-            nativePlayer = new NativeMediaPlayer(this, "http://archive.org/download/BigBuckBunny_328/BigBuckBunny_512kb.mp4");
+            nativePlayer = new NativeMediaPlayer(this, "https://white-pan.oss-cn-shanghai.aliyuncs.com/101/oceans.mp4");
             playerSyncManager = new PlayerSyncManager(nativePlayer, new PlayerSyncManager.Callbacks() {
                 @Override
                 public void startBuffering() {
