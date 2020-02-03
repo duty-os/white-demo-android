@@ -6,8 +6,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+
+import com.google.gson.JsonObject;
+//import com.herewhite.sdk.Utils.PreFetcher;
 
 public class StartActivity extends AppCompatActivity {
 
@@ -20,6 +24,25 @@ public class StartActivity extends AppCompatActivity {
         setContentView(R.layout.activity_start);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+//        PreFetcher prefetcher = new PreFetcher();
+//        prefetcher.setResultCallback(new PreFetcher.ResultCallback() {
+//            @Override
+//            public void fetchOriginConfigFail(Exception exception) {
+//
+//            }
+//
+//            @Override
+//            public void fetchOriginConfigSuccess(JsonObject jsonObject) {
+//
+//            }
+//
+//            @Override
+//            public void finishPrefetch(JsonObject jsonObject) {
+//                Log.i("fetch", "finishPrefetch: " + jsonObject.toString());
+//            }
+//        });
+//        prefetcher.fetchOriginConfigs();
     }
 
     public String getUuid() {
@@ -60,7 +83,6 @@ public class StartActivity extends AppCompatActivity {
         }
         Intent intent = new Intent(this, RoomActivity.class);
 
-//        String uuid = "fb4b7e680fcf46cf8aa02988908f2531";
         String uuid = getUuid();
         if (uuid.length() > 0) {
             intent.putExtra(EXTRA_MESSAGE, uuid);
@@ -76,10 +98,12 @@ public class StartActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, PlayActivity.class);
         
-//        String uuid = "fb4b7e680fcf46cf8aa02988908f2531";
         String uuid = getUuid();
         if (uuid.length() > 0) {
             intent.putExtra(EXTRA_MESSAGE, uuid);
+            startActivity(intent);
+        } else if (demoAPI.getDemoUUID().length() > 0) {
+            intent.putExtra(EXTRA_MESSAGE, demoAPI.getDemoUUID());
             startActivity(intent);
         } else {
             tokenAlert("uuid", "请填入回放用 uuid");
