@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.google.gson.JsonObject;
-//import com.herewhite.sdk.Utils.PreFetcher;
+import com.herewhite.sdk.Utils.PreFetcher;
 
 public class StartActivity extends AppCompatActivity {
 
@@ -25,24 +25,24 @@ public class StartActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-//        PreFetcher prefetcher = new PreFetcher();
-//        prefetcher.setResultCallback(new PreFetcher.ResultCallback() {
-//            @Override
-//            public void fetchOriginConfigFail(Exception exception) {
-//
-//            }
-//
-//            @Override
-//            public void fetchOriginConfigSuccess(JsonObject jsonObject) {
-//
-//            }
-//
-//            @Override
-//            public void finishPrefetch(JsonObject jsonObject) {
-//                Log.i("fetch", "finishPrefetch: " + jsonObject.toString());
-//            }
-//        });
-//        prefetcher.fetchOriginConfigs();
+        PreFetcher prefetcher = new PreFetcher();
+        prefetcher.setResultCallback(new PreFetcher.ResultCallback() {
+            @Override
+            public void fetchOriginConfigFail(Exception exception) {
+
+            }
+
+            @Override
+            public void fetchOriginConfigSuccess(JsonObject jsonObject) {
+
+            }
+
+            @Override
+            public void finishPrefetch(JsonObject jsonObject) {
+                Log.i("fetch", "finishPrefetch: " + jsonObject.toString());
+            }
+        });
+        prefetcher.fetchOriginConfigs();
     }
 
     public String getUuid() {
