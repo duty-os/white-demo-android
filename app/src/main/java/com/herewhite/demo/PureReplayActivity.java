@@ -12,16 +12,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SurfaceView;
 import android.webkit.WebView;
 import android.widget.SeekBar;
 import android.widget.Toast;
+
 import com.alibaba.sdk.android.httpdns.HttpDns;
 import com.alibaba.sdk.android.httpdns.HttpDnsService;
-
 import com.google.gson.Gson;
 import com.herewhite.sdk.AbstractPlayerEventListener;
-import com.herewhite.sdk.combinePlayer.PlayerSyncManager;
 import com.herewhite.sdk.Logger;
 import com.herewhite.sdk.Player;
 import com.herewhite.sdk.WhiteSdk;
@@ -37,40 +35,32 @@ import com.herewhite.sdk.domain.UrlInterrupter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
 
-public class PlayActivity extends AppCompatActivity {
+public class PureReplayActivity extends AppCompatActivity {
 
     private WhiteboardView whiteboardView;
     Player player;
     @Nullable
-    NativeMediaPlayer nativePlayer;
-    /*
-     * 如果不需要音视频混合播放，可以直接操作 Player
-     */
-    @Nullable
-    PlayerSyncManager playerSyncManager;
     Gson gson;
     private boolean mUserIsSeeking;
     private SeekBar mSeekBar;
     private final String TAG = "player";
-    private final String TAG_Native = "nativePlayer";
 
     private Handler mSeekBarUpdateHandler = new Handler();
     private Runnable mUpdateSeekBar = new Runnable() {
         @Override
         public void run() {
-            if (!nativePlayer.isNormalState() || mUserIsSeeking) {
+            if (player == null || player.getPlayerPhase() != PlayerPhase.playing || mUserIsSeeking) {
                 return;
             }
-            float progress = Float.valueOf(nativePlayer.getCurrentPosition()) / nativePlayer.getDuration() * 100;
-            Log.i(TAG_Native, "progress: " + progress );
-            mSeekBar.setProgress((int) progress);
+//            float progress = Float.valueOf(player.getCurrentPosition()) / nativePlayer.getDuration() * 100;
+//            Log.i(TAG_Native, "progress: " + progress );
+//            mSeekBar.setProgress((int) progress);
             mSeekBarUpdateHandler.postDelayed(this, 100);
         }
     };
 
-    public PlayActivity() {
+    public PureReplayActivity() {
         mUserIsSeeking = false;
         gson = new Gson();
     }
@@ -78,30 +68,11 @@ public class PlayActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_play);
+        setContentView(R.layout.activity_pure_replay);
         mSeekBar = findViewById(R.id.player_seek_bar);
 
         Intent intent = getIntent();
         final String uuid = intent.getStringExtra(StartActivity.EXTRA_MESSAGE);
-
-        try {
-            nativePlayer = new NativeMediaPlayer(this, "http://archive.org/download/BigBuckBunny_328/BigBuckBunny_512kb.mp4");
-            playerSyncManager = new PlayerSyncManager(nativePlayer, new PlayerSyncManager.Callbacks() {
-                @Override
-                public void startBuffering() {
-                    Log.d(TAG_Native, "startBuffering: ");
-                }
-
-                @Override
-                public void endBuffering() {
-                    Log.d(TAG_Native, "endBuffering: ");
-
-                }
-            });
-            Log.d(TAG_Native, "create success");
-        } catch (Throwable e) {
-            Log.e(TAG_Native, "create fail");
-        }
 
         if (uuid != null) {
             whiteboardView = findViewById(R.id.white);
@@ -157,23 +128,18 @@ public class PlayActivity extends AppCompatActivity {
 
 
     public void play(MenuItem item) {
-        if (playerSyncManager != null) {
-            playerSyncManager.play();
-        }
+        play();
     }
 
     public void pause(MenuItem item) {
-        if (playerSyncManager != null) {
-            playerSyncManager.pause();
-        }
+        pause();
     }
 
     public void seek(MenuItem item) {
         if (player.getPlayerPhase().equals(PlayerPhase.waitingFirstFrame)) {
             return;
         } else {
-            //12秒的视频画面，区别明显；白板画面，看不出来，要看 scheduleTime 变化
-            nativePlayer.seek(12, TimeUnit.SECONDS);
+            player.seekToScheduleTime(12000);
         }
     }
 
@@ -181,16 +147,16 @@ public class PlayActivity extends AppCompatActivity {
 
     //region private
     public void play() {
-        if (playerSyncManager != null && player != null) {
-            playerSyncManager.play();
+        if (player != null) {
+            player.play();
             mSeekBarUpdateHandler.removeCallbacks(mUpdateSeekBar);
             mSeekBarUpdateHandler.postDelayed(mUpdateSeekBar, 100);
         }
     }
 
     public void pause() {
-        if (playerSyncManager != null && player != null) {
-            playerSyncManager.pause();
+        if (player != null) {
+            player.play();
             mSeekBarUpdateHandler.removeCallbacks(mUpdateSeekBar);
         }
     }
@@ -206,8 +172,8 @@ public class PlayActivity extends AppCompatActivity {
     }
 
     public void rest(android.view.View button) {
-        if (nativePlayer != null) {
-            nativePlayer.seek(0, TimeUnit.SECONDS);
+        if (player != null) {
+            player.seekToScheduleTime(0);
         }
     }
 
@@ -231,10 +197,7 @@ public class PlayActivity extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mUserIsSeeking = false;
-                if (nativePlayer != null && nativePlayer.isNormalState()) {
-                    float progress = userSelectedPosition / 100.f * nativePlayer.getDuration();
-                    nativePlayer.seek((int) progress, TimeUnit.SECONDS);
-                }
+                //todo:
             }
         });
     }
@@ -245,7 +208,7 @@ public class PlayActivity extends AppCompatActivity {
 
         runOnUiThread(new Runnable() {
             public void run() {
-                AlertDialog alertDialog = new AlertDialog.Builder(PlayActivity.this).create();
+                AlertDialog alertDialog = new AlertDialog.Builder(PureReplayActivity.this).create();
                 alertDialog.setTitle(title);
                 alertDialog.setMessage(detail);
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
@@ -263,7 +226,7 @@ public class PlayActivity extends AppCompatActivity {
     private void player(String uuid, String roomToken) {
         WhiteSdk whiteSdk = new WhiteSdk(
                 whiteboardView,
-                PlayActivity.this,
+                PureReplayActivity.this,
                 new WhiteSdkConfiguration(DeviceType.touch, 10, 0.1, true),
                 new UrlInterrupter() {
                     @Override
@@ -279,9 +242,6 @@ public class PlayActivity extends AppCompatActivity {
             public void onPhaseChanged(PlayerPhase phase) {
                 Log.i(TAG, "onPhaseChanged: " + phase);
                 showToast(gson.toJson(phase));
-                if (playerSyncManager != null) {
-                    playerSyncManager.updateWhitePlayerPhase(phase);
-                }
             }
 
             @Override
@@ -324,10 +284,6 @@ public class PlayActivity extends AppCompatActivity {
             public void then(Player wPlayer) {
                 player = wPlayer;
                 setupSeekBar();
-                SurfaceView surfaceView = findViewById(R.id.surfaceView);
-                playerSyncManager.setWhitePlayer(player);
-                nativePlayer.setSurfaceView(surfaceView);
-                nativePlayer.setPlayerSyncManager(playerSyncManager);
                 // seek 一次才能主动触发
                 wPlayer.seekToScheduleTime(0);
             }
@@ -341,9 +297,9 @@ public class PlayActivity extends AppCompatActivity {
 
     public void orientation(MenuItem item) {
         if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-            PlayActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            PureReplayActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else {
-            PlayActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            PureReplayActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
     }
 
