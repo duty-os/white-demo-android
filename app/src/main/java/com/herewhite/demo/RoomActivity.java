@@ -1,5 +1,6 @@
 package com.herewhite.demo;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,6 +18,8 @@ import android.widget.Toast;
 import com.alibaba.sdk.android.httpdns.HttpDns;
 import com.alibaba.sdk.android.httpdns.HttpDnsService;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.herewhite.sdk.Utils.PreFetcher;
 import com.herewhite.sdk.domain.AnimationMode;
 import com.herewhite.sdk.domain.Scene;
 import com.herewhite.sdk.AbstractRoomCallbacks;
@@ -74,6 +77,7 @@ public class RoomActivity extends AppCompatActivity {
 
     private String uuid;
     private String roomToken;
+    private JsonObject origins;
 
     WhiteboardView whiteboardView;
     Room room;
@@ -109,12 +113,30 @@ public class RoomActivity extends AppCompatActivity {
         useHttpDnsService(false);
 
         Intent intent = getIntent();
-        String uuid = intent.getStringExtra(StartActivity.EXTRA_MESSAGE);
-        if (uuid == null) {
-            createRoom();
-        } else {
-            getRoomToken(uuid);
-        }
+        final String uuid = intent.getStringExtra(StartActivity.EXTRA_MESSAGE);
+
+        PreFetcher fetcher = new PreFetcher();
+        fetcher.setResultCallback(new PreFetcher.ResultCallback() {
+            @Override
+            public void fetchOriginConfigFail(Exception exception) {
+
+            }
+
+            @Override
+            public void fetchOriginConfigSuccess(JsonObject jsonObject) {
+
+            }
+
+            @Override
+            public void finishPrefetch(JsonObject jsonObject) {
+                origins = jsonObject;
+                if (uuid == null) {
+                    createRoom();
+                } else {
+                    getRoomToken(uuid);
+                }
+            }
+        });
     }
 
     //region room
@@ -162,6 +184,7 @@ public class RoomActivity extends AppCompatActivity {
         HashMap<String, String> map = new HashMap<>();
         map.put("宋体","https://your-cdn.com/Songti.ttf");
         sdkConfiguration.setFonts(map);
+        sdkConfiguration.setSdkStrategyConfig(origins);
 
         //图片替换 API，需要在 whiteSDKConfig 中先行调用 setHasUrlInterrupterAPI，进行设置，否则不会被回调。
         WhiteSdk whiteSdk = new WhiteSdk(whiteboardView, RoomActivity.this, sdkConfiguration,
@@ -180,6 +203,7 @@ public class RoomActivity extends AppCompatActivity {
 
         final Date joinDate = new Date();
         logRoomInfo("native join " + joinDate);
+
         whiteSdk.joinRoom(roomParams, new AbstractRoomCallbacks() {
             @Override
             public void onPhaseChanged(RoomPhase phase) {
@@ -335,6 +359,7 @@ public class RoomActivity extends AppCompatActivity {
         });
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
     public void orientation(MenuItem item) {
         if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
             RoomActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
