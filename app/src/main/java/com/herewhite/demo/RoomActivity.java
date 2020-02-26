@@ -137,6 +137,7 @@ public class RoomActivity extends AppCompatActivity {
                 }
             }
         });
+        fetcher.fetchOriginConfigs();
     }
 
     //region room
