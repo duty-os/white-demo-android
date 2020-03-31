@@ -18,8 +18,6 @@ import android.widget.Toast;
 import com.alibaba.sdk.android.httpdns.HttpDns;
 import com.alibaba.sdk.android.httpdns.HttpDnsService;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.herewhite.sdk.Utils.PreFetcher;
 import com.herewhite.sdk.domain.AnimationMode;
 import com.herewhite.sdk.domain.Scene;
 import com.herewhite.sdk.AbstractRoomCallbacks;
@@ -56,6 +54,7 @@ import com.herewhite.sdk.domain.SDKError;
 import com.herewhite.sdk.domain.UrlInterrupter;
 import com.herewhite.sdk.domain.ViewMode;
 import com.herewhite.sdk.domain.WhiteDisplayerState;
+import com.herewhite.sdk.domain.WhiteScenePathType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,7 +66,7 @@ import wendu.dsbridge.DWebView;
 public class RoomActivity extends AppCompatActivity {
 
     /** 和 iOS 名字一致 */
-    final String EVENT_NAME = "WhiteCommandCustomEvent";
+    final String EVENT_NAME = "EVENT_AUDIO_CONTROL";
 
     final String SCENE_DIR = "/dir";
     final String ROOM_INFO = "room info";
@@ -77,7 +76,6 @@ public class RoomActivity extends AppCompatActivity {
 
     private String uuid;
     private String roomToken;
-    private JsonObject origins;
 
     WhiteboardView whiteboardView;
     Room room;
@@ -113,31 +111,12 @@ public class RoomActivity extends AppCompatActivity {
         useHttpDnsService(false);
 
         Intent intent = getIntent();
-        final String uuid = intent.getStringExtra(StartActivity.EXTRA_MESSAGE);
-
-        PreFetcher fetcher = new PreFetcher();
-        fetcher.setResultCallback(new PreFetcher.ResultCallback() {
-            @Override
-            public void fetchOriginConfigFail(Exception exception) {
-
-            }
-
-            @Override
-            public void fetchOriginConfigSuccess(JsonObject jsonObject) {
-
-            }
-
-            @Override
-            public void finishPrefetch(JsonObject jsonObject) {
-                origins = jsonObject;
-                if (uuid == null) {
-                    createRoom();
-                } else {
-                    getRoomToken(uuid);
-                }
-            }
-        });
-        fetcher.fetchOriginConfigs();
+        String uuid = intent.getStringExtra(StartActivity.EXTRA_MESSAGE);
+        if (uuid == null) {
+            createRoom();
+        } else {
+            getRoomToken(uuid);
+        }
     }
 
     //region room
@@ -185,7 +164,6 @@ public class RoomActivity extends AppCompatActivity {
         HashMap<String, String> map = new HashMap<>();
         map.put("宋体","https://your-cdn.com/Songti.ttf");
         sdkConfiguration.setFonts(map);
-        sdkConfiguration.setSdkStrategyConfig(origins);
 
         //图片替换 API，需要在 whiteSDKConfig 中先行调用 setHasUrlInterrupterAPI，进行设置，否则不会被回调。
         WhiteSdk whiteSdk = new WhiteSdk(whiteboardView, RoomActivity.this, sdkConfiguration,
