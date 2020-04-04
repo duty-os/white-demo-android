@@ -66,7 +66,7 @@ import wendu.dsbridge.DWebView;
 public class RoomActivity extends AppCompatActivity {
 
     /** 和 iOS 名字一致 */
-    final String EVENT_NAME = "EVENT_AUDIO_CONTROL";
+    final String EVENT_NAME = "WhiteCommandCustomEvent";
 
     final String SCENE_DIR = "/dir";
     final String ROOM_INFO = "room info";
@@ -182,7 +182,6 @@ public class RoomActivity extends AppCompatActivity {
 
         final Date joinDate = new Date();
         logRoomInfo("native join " + joinDate);
-
         whiteSdk.joinRoom(roomParams, new AbstractRoomCallbacks() {
             @Override
             public void onPhaseChanged(RoomPhase phase) {

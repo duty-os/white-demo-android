@@ -1,8 +1,10 @@
 package com.herewhite.demo;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
@@ -39,9 +41,9 @@ import java.util.concurrent.TimeUnit;
 
 public class PureReplayActivity extends AppCompatActivity implements PlayerEventListener {
 
-    private WhiteboardView whiteboardView;
+    protected WhiteboardView whiteboardView;
     @Nullable
-    Player player;
+    protected Player player;
     Gson gson;
     protected boolean mUserIsSeeking;
     protected SeekBar mSeekBar;
@@ -58,29 +60,41 @@ public class PureReplayActivity extends AppCompatActivity implements PlayerEvent
         setContentView(R.layout.activity_pure_replay);
         mSeekBar = findViewById(R.id.player_seek_bar);
         whiteboardView = findViewById(R.id.white);
+
         WebView.setWebContentsDebuggingEnabled(true);
         //是否开启 httpDns
         useHttpDnsService(false);
+        setupPlayer();
+    }
 
+    protected void setupPlayer() {
         Intent intent = getIntent();
         final String uuid = intent.getStringExtra(StartActivity.EXTRA_MESSAGE);
 
-        if (uuid != null) {
-            new DemoAPI().getRoomToken(uuid, new DemoAPI.Result() {
-                @Override
-                public void success(String uuid, String roomToken) {
-                    initPlayer(uuid, roomToken);
-                }
+        DemoAPI demoAPI = new DemoAPI();
 
-                @Override
-                public void fail(String message) {
-                    alert("创建回放失败: ", message);
-                }
-            });
+        DemoAPI.Result result = new DemoAPI.Result() {
+            @Override
+            public void success(String uuid, String roomToken) {
+                initPlayer(uuid, roomToken);
+            }
+
+            @Override
+            public void fail(String message) {
+                alert("创建回放失败: ", message);
+            }
+        };
+
+        if (uuid != null) {
+            demoAPI.getRoomToken(uuid, result);
+        } else if (demoAPI.hasDemoInfo()) {
+            demoAPI.getNewRoom(result);
+        } else {
+            alert("无数据", "没有房间 uuid");
         }
     }
 
-    private void useHttpDnsService(boolean use) {
+    protected void useHttpDnsService(boolean use) {
         if (use) {
             // 阿里云 httpDns 替换
             HttpDnsService httpDns = HttpDns.getService(getApplicationContext(), "188301");
@@ -103,6 +117,15 @@ public class PureReplayActivity extends AppCompatActivity implements PlayerEvent
         return true;
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
+    public void orientation(MenuItem item) {
+        if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+            PureReplayActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        } else {
+            PureReplayActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+    }
+
     public void getTimeInfo(MenuItem item) {
         Log.i(TAG, gson.toJson(player.getPlayerTimeInfo()));
     }
@@ -118,7 +141,7 @@ public class PureReplayActivity extends AppCompatActivity implements PlayerEvent
     //endregion
 
     //region Play Action
-    public void play() {
+    protected void play() {
         if (player != null) {
             player.play();
             mSeekBarUpdateHandler.removeCallbacks(mUpdateSeekBar);
@@ -126,25 +149,26 @@ public class PureReplayActivity extends AppCompatActivity implements PlayerEvent
         }
     }
 
-    public void pause() {
+    protected void pause() {
         if (player != null) {
             player.pause();
             mSeekBarUpdateHandler.removeCallbacks(mUpdateSeekBar);
         }
     }
 
-    void seek(Long time, TimeUnit timeUnit) {
+    protected void seek(Long time, TimeUnit timeUnit) {
         if (player != null) {
             long scheduleTime = TimeUnit.MILLISECONDS.convert(time, timeUnit);
             player.seekToScheduleTime(scheduleTime);
         }
     }
 
-    void seek(float progress) {
+    protected void seek(float progress) {
         if (player != null && player.getPlayerPhase() != PlayerPhase.waitingFirstFrame) {
             PlayerTimeInfo timeInfo = player.getPlayerTimeInfo();
-            long time = (long) progress * timeInfo.getTimeDuration();
+            long time = (long) (progress * timeInfo.getTimeDuration());
             seek(time, TimeUnit.MILLISECONDS);
+            Log.i(TAG, "seek: " + time + " progress: " + playerProgress());
             mSeekBar.setProgress((int) playerProgress());
         }
     }
@@ -166,7 +190,7 @@ public class PureReplayActivity extends AppCompatActivity implements PlayerEvent
         pause();
     }
 
-    public void rest(android.view.View button) {
+    public void reset(android.view.View button) {
         seek(0l);
     }
 
@@ -188,8 +212,7 @@ public class PureReplayActivity extends AppCompatActivity implements PlayerEvent
     };
 
     protected void setupSeekBar() {
-        SeekBar seekBar = findViewById(R.id.player_seek_bar);
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             int userSelectedPosition = 0;
 
             @Override
@@ -207,15 +230,14 @@ public class PureReplayActivity extends AppCompatActivity implements PlayerEvent
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mUserIsSeeking = false;
-                PlayerPhase playerPhase = player.getPlayerPhase();
-                seek(userSelectedPosition / 100l);
+                seek(userSelectedPosition / 100f);
             }
         });
     }
 
     //endregion
 
-    private void initPlayer(String uuid, String roomToken) {
+    protected void initPlayer(String uuid, String roomToken) {
         WhiteSdk whiteSdk = new WhiteSdk(whiteboardView, PureReplayActivity.this,
                 new WhiteSdkConfiguration(DeviceType.touch, 10, 0.1, true),
                 new UrlInterrupter() {
@@ -226,8 +248,9 @@ public class PureReplayActivity extends AppCompatActivity implements PlayerEvent
         });
 
         PlayerConfiguration playerConfiguration = new PlayerConfiguration(uuid, roomToken);
-        // 60 秒，时间太长，seek bar 进度条移动不明显。
+        // 只回放 60 秒。如果时间太长，seek bar 进度条移动不明显。
         playerConfiguration.setDuration(60000l);
+
         // 如果只想实现部分 PlayerEventListener 可以使用 AbstractPlayerEventListener，替换其中想实现的方法
         whiteSdk.createPlayer(playerConfiguration, this, new Promise<Player>() {
             @Override
@@ -235,7 +258,8 @@ public class PureReplayActivity extends AppCompatActivity implements PlayerEvent
                 player = wPlayer;
                 setupSeekBar();
                 wPlayer.seekToScheduleTime(0);
-//                wPlayer.play();
+                wPlayer.play();
+                mSeekBarUpdateHandler.postDelayed(mUpdateSeekBar, 100);
                 enableBtn();
             }
 
@@ -297,6 +321,11 @@ public class PureReplayActivity extends AppCompatActivity implements PlayerEvent
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+
+        if (player == null) {
+            return;
+        }
+        // 横竖屏等，引起白板大小变化时，需要手动调用该 API
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
