@@ -46,7 +46,7 @@ public class PlayActivity extends AppCompatActivity implements PlayerEventListen
     protected WhiteboardView whiteboardView;
     @Nullable
     protected Player player;
-    Gson gson;
+    Gson gson = new Gson();
     protected boolean mUserIsSeeking;
     protected SeekBar mSeekBar;
     @Nullable
