@@ -89,6 +89,14 @@ public class PlayActivity extends AppCompatActivity implements PlayerEventListen
     }
     //endregion
 
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        playerSyncManager.pause();
+        mSeekBarUpdateHandler.removeCallbacks(mUpdateSeekBar);
+    }
+
     //region override
     protected void setupPlayer() {
         Intent intent = getIntent();
