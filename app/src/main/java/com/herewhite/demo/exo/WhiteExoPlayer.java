@@ -3,6 +3,9 @@ package com.herewhite.demo.exo;
 import android.content.Context;
 import android.net.Uri;
 import androidx.annotation.NonNull;
+
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.google.android.exoplayer2.C;
@@ -32,6 +35,8 @@ public class WhiteExoPlayer implements NativePlayer, Player.EventListener {
     private PlayerView mPlayerView;
     private DataSource.Factory mDataSourceFactory;
 
+    private Handler mHandler;
+
     private PlayerSyncManager mPlayerSyncManager;
     private NativePlayerPhase mPlayerPhase = NativePlayerPhase.Idle;
 
@@ -39,6 +44,7 @@ public class WhiteExoPlayer implements NativePlayer, Player.EventListener {
 
     public WhiteExoPlayer(Context context) {
         mContext = context;
+        mHandler = new Handler(Looper.getMainLooper());
         mExoPlayer = new SimpleExoPlayer.Builder(mContext.getApplicationContext()).build();
         mExoPlayer.addListener(this);
         mExoPlayer.setAudioAttributes(AudioAttributes.DEFAULT, /* handleAudioFocus= */ true);
@@ -111,6 +117,9 @@ public class WhiteExoPlayer implements NativePlayer, Player.EventListener {
      * @return true or false
      */
     public boolean isPlaying() {
+        if (mExoPlayer == null) {
+            return false;
+        }
         return mExoPlayer.isPlaying();
     }
 
@@ -165,18 +174,22 @@ public class WhiteExoPlayer implements NativePlayer, Player.EventListener {
 
     @Override
     public void play() {
-        if (isPlaying()) {
-            return;
-        }
-        mExoPlayer.setPlayWhenReady(true);
+        mHandler.post(() -> {
+            if (isPlaying()) {
+                return;
+            }
+            mExoPlayer.setPlayWhenReady(true);
+        });
     }
 
     @Override
     public void pause() {
-        if (!isPlaying()) {
-            return;
-        }
-        mExoPlayer.setPlayWhenReady(false);
+        mHandler.post(() -> {
+            if (!isPlaying()) {
+                return;
+            }
+            mExoPlayer.setPlayWhenReady(false);
+        });
     }
 
     @Override
