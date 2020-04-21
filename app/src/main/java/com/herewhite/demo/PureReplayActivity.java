@@ -207,8 +207,11 @@ public class PureReplayActivity extends AppCompatActivity implements PlayerEvent
                 return;
             }
             float progress = playerProgress();
-            Log.v(TAG, "progress: " + progress);
-            mSeekBar.setProgress((int) progress);
+            if (player.getPlayerPhase() == PlayerPhase.playing) {
+                Log.v(TAG, "progress: " + progress);
+                mSeekBar.setProgress((int) progress);
+            }
+
             mSeekBarUpdateHandler.postDelayed(this, 100);
         }
     };
