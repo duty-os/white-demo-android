@@ -1,13 +1,17 @@
 package com.herewhite.demo;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.SeekBar;
@@ -201,6 +205,41 @@ public class PlayActivity extends AppCompatActivity implements PlayerEventListen
         findViewById(R.id.button_pause).setEnabled(true);
         findViewById(R.id.button_reset).setEnabled(true);
     }
+
+    //region menu
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.replayer_command, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return true;
+    }
+
+    @SuppressLint("SourceLockedOrientationActivity")
+    public void orientation(MenuItem item) {
+        if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+            PlayActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        } else {
+            PlayActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+    }
+
+    public void getTimeInfo(MenuItem item) {
+        Log.i(TAG, gson.toJson(mPlaybackPlayer.getPlayerTimeInfo()));
+    }
+
+    public void getPlayState(MenuItem item) {
+        Log.i(TAG, gson.toJson(mPlaybackPlayer.getPlayerState()));
+    }
+
+    public void getPhase(MenuItem item) {
+        Log.i(TAG, gson.toJson(mPlaybackPlayer.getPlayerPhase()));
+    }
+
+    //endregion
 
     protected void play() {
         if (isPlayable()) {
