@@ -264,6 +264,8 @@ public class PlayActivity extends AppCompatActivity implements PlayerEventListen
             } else {
                 ((WhiteIjkPlayer) mWhiteMediaPlayer).seek(time, timeUnit);
             }
+            mSeekBarUpdateHandler.removeCallbacks(mUpdateSeekBar);
+            mSeekBarUpdateHandler.postDelayed(mUpdateSeekBar, 100);
         }
     }
 

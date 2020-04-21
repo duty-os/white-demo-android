@@ -170,6 +170,8 @@ public class PureReplayActivity extends AppCompatActivity implements PlayerEvent
             seek(time, TimeUnit.MILLISECONDS);
             Log.i(TAG, "seek: " + time + " progress: " + playerProgress());
             mSeekBar.setProgress((int) playerProgress());
+            mSeekBarUpdateHandler.removeCallbacks(mUpdateSeekBar);
+            mSeekBarUpdateHandler.postDelayed(mUpdateSeekBar, 100);
         }
     }
     //endregion
