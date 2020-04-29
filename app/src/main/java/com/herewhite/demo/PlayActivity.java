@@ -286,7 +286,7 @@ public class PlayActivity extends AppCompatActivity implements PlayerEventListen
             if (mUserIsSeeking) {
                 return;
             }
-            // FIXME:正在 seek 时，progress 会被重置到旧的时间，只有 seek 完成，progress 就正确了
+            // FIXME:正在 seek 时，progress 会被重置到旧的时间，只有 seek 完成，progress 才会恢复正确
             float progress = playerProgress();
             Log.v(TAG, "progress: " + progress);
             mSeekBar.setProgress((int) progress);
