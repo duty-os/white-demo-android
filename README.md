@@ -2,8 +2,11 @@
 
 ## 快速调试
 
+>快速调试需要开发者已经阅读过 https://developer.netless.link 快速集成部分，获取 AppIdentifier 等部分内容。
+
 修改 DemoAPI 类中，讲已有的 room uuid 与 roomToken 填入在以下字段中
-```
+```Java
+    private String AppIdentifier = "";
     private String demoUUID = "";
     private String demoRoomToken = "";
 ```
