@@ -95,6 +95,12 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        whiteboardView.removeAllViews();
+        whiteboardView.destroy();
+    }
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
