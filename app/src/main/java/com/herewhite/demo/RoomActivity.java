@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.alibaba.sdk.android.httpdns.HttpDns;
 import com.alibaba.sdk.android.httpdns.HttpDnsService;
 import com.google.gson.Gson;
+import com.herewhite.sdk.CommonCallbacks;
 import com.herewhite.sdk.domain.AnimationMode;
 import com.herewhite.sdk.domain.Scene;
 import com.herewhite.sdk.AbstractRoomCallbacks;
@@ -187,6 +188,33 @@ public class RoomActivity extends AppCompatActivity {
 
         /** 设置自定义全局状态，在后续回调中 GlobalState 直接进行类型转换即可 */
         WhiteDisplayerState.setCustomGlobalStateClass(MyGlobalState.class);
+
+        whiteSdk.setCommonCallbacks(new CommonCallbacks() {
+            @Override
+            public String urlInterrupter(String sourceUrl) {
+                return sourceUrl;
+            }
+
+            @Override
+            public void sdkSetupFail(SDKError error) {
+                Log.e("ROOM_ERROR", error.toString());
+            }
+
+            @Override
+            public void throwError(Object args) {
+
+            }
+
+            @Override
+            public void onPPTMediaPlay() {
+                logAction();
+            }
+
+            @Override
+            public void onPPTMediaPause() {
+                logAction();
+            }
+        });
 
         //如需支持用户头像，请在设置 WhiteSdkConfiguration 后，再调用 setUserPayload 方法，传入符合用户信息
         RoomParams roomParams = new RoomParams(uuid, roomToken);
