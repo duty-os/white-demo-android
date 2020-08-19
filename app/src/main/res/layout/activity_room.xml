@@ -7,10 +7,43 @@
     android:orientation="vertical"
     tools:context=".RoomActivity">
 
+    <FrameLayout
+        android:id="@+id/remote_video_view_container"
+        android:layout_width="80dp"
+        android:layout_height="130dp"
+        android:background="#ffffff">
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/btn_call"
+            android:layout_width="@dimen/call_button_size"
+            android:layout_height="@dimen/call_button_size"
+            android:layout_centerInParent="true"
+            android:onClick="onCallClicked"
+            android:src="@drawable/btn_startcall"
+            android:scaleType="centerCrop"/>
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/local_video_view_container"
+        android:layout_width="80dp"
+        android:layout_height="130dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="0dp"
+        android:background="#827b92">
+
+    </FrameLayout>
     <com.herewhite.sdk.WhiteboardView
         android:id="@+id/white"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="visible" />
-
 </LinearLayout>
