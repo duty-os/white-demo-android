@@ -238,6 +238,7 @@ public class RoomActivity extends AppCompatActivity {
                 //记录加入房间消耗的时长
                 logRoomInfo("native join in room duration: " + (new Date().getTime() - joinDate.getTime()) / 1000f + "s");
                 room = wRoom;
+                room.disableSerialization(false);
                 addCustomEventListener();
             }
 
@@ -407,19 +408,19 @@ public class RoomActivity extends AppCompatActivity {
 
     public void undoRedoOperation(MenuItem item) {
         // 需要开启本地序列化，才能操作 redo undo
-        room.disableSerialization(false);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
+//        room.disableSerialization(false);
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
                 room.undo();
-            }
-        }, 10000);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                room.redo();
-            }
-        }, 15000);
+//            }
+//        }, 10000);
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                room.redo();
+//            }
+//        }, 15000);
     }
 
     public void duplicate(MenuItem item) {
