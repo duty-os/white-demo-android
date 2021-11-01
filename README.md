@@ -1,5 +1,7 @@
 # white demo android
 
+本项目已经不再维护，请访问[whiteboard-android](https://github.com/netless-io/whiteboard-android)
+
 ## TOC
 
 - [快速调试](#快速调试)
